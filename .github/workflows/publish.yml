@@ -15,23 +15,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet tool restore
       - run: dotnet paket config add-token 'https://www.nuget.org' '${{ secrets.NUGET_TOKEN }}'
       - run: dotnet fake build
       - run: dotnet fake build -t Release
-      - name: Get Changelog Entry
+      - uses: mindsers/changelog-reader-action@v1.1.0
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v1.1.0
         with:
           version: ${{ github.ref }}
           path: ./CHANGELOG.md
-      - name: Create github Release
+      - uses: actions/create-release@latest
         id: create_release
-        uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
@@ -40,8 +37,7 @@ jobs:
           body: ${{ steps.changelog_reader.outputs.log_entry }}
           draft: false
           prerelease: false
-      - name: Upload binaries to github release
-        uses: svenstaro/upload-release-action@v1-release
+      - uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: out/*.nupkg

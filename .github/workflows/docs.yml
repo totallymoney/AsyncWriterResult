@@ -15,18 +15,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.201
-      - name: Restore tools
-        run: dotnet tool restore
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Run Fornax
-        run: dotnet fake build -t Docs
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - run: dotnet tool restore
+      - run: dotnet restore
+      - run: dotnet fake build -t Docs
+      - uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_public

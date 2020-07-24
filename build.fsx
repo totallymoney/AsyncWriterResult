@@ -178,11 +178,12 @@ Target.create "ReleaseGitHub" (fun _ ->
 )
 
 Target.create "Push" (fun _ ->
-    let key =
-        match getBuildParam "nuget-key" with
-        | s when not (isNullOrWhiteSpace s) -> s
-        | _ -> UserInput.getUserPassword "NuGet Key: "
-    Paket.push (fun p -> { p with WorkingDir = nugetDir; ApiKey = key; ToolType = ToolType.CreateLocalTool() }))
+    // let key =
+    //     match getBuildParam "nuget-key" with
+    //     | s when not (isNullOrWhiteSpace s) -> s
+    //     | _ -> UserInput.getUserPassword "NuGet Key: "
+    // Paket.push (fun p -> { p with WorkingDir = nugetDir; ApiKey = key; ToolType = ToolType.CreateLocalTool() }))
+    Paket.push (fun p -> { p with WorkingDir = nugetDir; PublishUrl = "https://www.nuget.org"; ToolType = ToolType.CreateLocalTool() }))
 
 // --------------------------------------------------------------------------------------
 // Build order

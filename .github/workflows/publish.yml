@@ -20,10 +20,9 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet tool restore
+      - run: dotnet paket config add-token 'https://www.nuget.org' '${{ secrets.NUGET_TOKEN }}'
       - run: dotnet fake build
       - run: dotnet fake build -t Release
-        env:
-          nuget_key: ${{ secrets.NUGET_TOKEN }}
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v1.1.0

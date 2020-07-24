@@ -1,6 +1,6 @@
-﻿namespace AsyncWriterResult
+﻿[<AutoOpen>]
+module AsyncWriterResult
 
-[<AutoOpen>]
 module Async =
 
   let retn x = async {
@@ -26,19 +26,10 @@ module Async =
     a |> (Async.AwaitTask >> Async.RunSynchronously)
 
 
-[<AutoOpen>]
 module Result =
 
   let retn =
     Ok
-
-  let ofOption e = function
-    | Some x -> Ok x
-    | None -> Error e
-
-  let toOption = function
-    | Ok x -> Some x
-    | Error _ -> None
 
   let apply f m =
     match f, m with
@@ -48,14 +39,6 @@ module Result =
 
   let (<!>) = Result.map
   let (<*>) = apply
-
-  let either ok error = function
-    | Ok x -> ok x
-    | Error _ -> error
-
-  let fromByRef e = function
-    | true, x -> Ok x
-    | _ -> Error e
 
   let traverseResultM f list =
 
@@ -72,9 +55,6 @@ module Result =
 
     List.foldBack folder list (retn [])
 
-  let tryTo f x =
-    try f x |> Ok
-    with e -> Error e.Message
 
 
 type Writer<'w, 't> =
@@ -112,7 +92,6 @@ module Writer =
     Writer <| fun () -> (), [log]
 
 
-[<AutoOpen>]
 module WriterResult =
 
   let retn x =
@@ -223,44 +202,42 @@ module AsyncWriter =
     Writer.retn a |> Async.retn
 
 
-[<AutoOpen>]
-module ElevatedOperators =
 
-  type ResultBuilder () =
-    member __.Return (x) = Result.retn x
-    member __.ReturnFrom (m: Result<_, _>) = m
-    member __.Bind (m, f) = Result.bind f m
-    member __.Zero () = Error ()
+type ResultBuilder () =
+  member __.Return (x) = Result.retn x
+  member __.ReturnFrom (m: Result<_, _>) = m
+  member __.Bind (m, f) = Result.bind f m
+  member __.Zero () = Error ()
 
-  let result =
-    new ResultBuilder ()
+let result =
+  new ResultBuilder ()
 
 
-  type WriterBuilder () =
-    member __.Return (x) = Writer.retn x
-    member __.ReturnFrom (m: Writer<'w, 't>) = m
-    member __.Bind (m, f) = Writer.bind m f
-    member __.Zero () = __.Return ()
+type WriterBuilder () =
+  member __.Return (x) = Writer.retn x
+  member __.ReturnFrom (m: Writer<'w, 't>) = m
+  member __.Bind (m, f) = Writer.bind m f
+  member __.Zero () = __.Return ()
 
-  let writer =
-    new WriterBuilder ()
-
-
-  type WriterResultBuilder () =
-    member __.Return (x) = WriterResult.retn x
-    member __.ReturnFrom (m: Writer<'w, Result<'a, 'b>>) = m
-    member __.Bind (m, f) = WriterResult.bind f m
-    member __.Zero () = __.Return ()
-
-  let writerResult =
-    new WriterResultBuilder ()
+let writer =
+  new WriterBuilder ()
 
 
-  type AsyncWriterResultBuilder () =
-    member __.Return (x) = AsyncWriterResult.retn x
-    member __.ReturnFrom (m: Async<Writer<'w, Result<'a, 'b>>>) = m
-    member __.Bind (m, f) = AsyncWriterResult.bind f m
-    member __.Zero () = __.Return ()
+type WriterResultBuilder () =
+  member __.Return (x) = WriterResult.retn x
+  member __.ReturnFrom (m: Writer<'w, Result<'a, 'b>>) = m
+  member __.Bind (m, f) = WriterResult.bind f m
+  member __.Zero () = __.Return ()
 
-  let asyncWriterResult =
-    new AsyncWriterResultBuilder ()
+let writerResult =
+  new WriterResultBuilder ()
+
+
+type AsyncWriterResultBuilder () =
+  member __.Return (x) = AsyncWriterResult.retn x
+  member __.ReturnFrom (m: Async<Writer<'w, Result<'a, 'b>>>) = m
+  member __.Bind (m, f) = AsyncWriterResult.bind f m
+  member __.Zero () = __.Return ()
+
+let asyncWriterResult =
+  new AsyncWriterResultBuilder ()

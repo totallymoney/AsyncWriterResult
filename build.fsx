@@ -201,7 +201,7 @@ Target.create "Release" DoNothing
 
 "Default"
   ==> "Pack"
-  ==> "ReleaseGitHub"
+//   ==> "ReleaseGitHub"
   ==> "Push"
   ==> "Release"
 

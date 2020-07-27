@@ -44,8 +44,7 @@ jobs:
       - run: |
           dotnet nuget push \
           out/*.nupkg \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source "https://nuget.pkg.github.com/totallymoney/index.json"
+          --source github
 
       - uses: actions/create-release@latest
         env:

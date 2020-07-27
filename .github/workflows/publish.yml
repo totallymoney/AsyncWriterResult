@@ -5,22 +5,22 @@ on:
     branches:
       - master
 
+env:
+  publish_version: 0.0.$GITHUB_RUN_NUMBER
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    defaults:
-      - version: 0.0.$GITHUB_RUN_NUMBER
-      - dotnet: 3.1.201
-    # strategy:
-    #   matrix:
-    #     os: [ubuntu-latest]
-    #     dotnet: [3.1.201]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        dotnet: [3.1.201]
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ defaults.dotnet }}
+          dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet tool restore
       - run: dotnet paket restore
 
@@ -36,13 +36,13 @@ jobs:
           dotnet pack \
           --configuration Release \
           --output ./out \
-          -p:PackageVersion=${{ defaults.version }} \
+          -p:PackageVersion=${{ env.publish_version }} \
           -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
 
       - run: |
           dotnet nuget push \
           out/*.nupkg \
-          --api-key ${{ secrets.NUGET_TOKEN }}
+          --api-key ${{ secrets.NUGET_TOKEN }} \
           --source https://www.nuget.org
 
       # - uses: mindsers/changelog-reader-action@v1.1.0
@@ -55,8 +55,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ defaults.version }}
-          release_name: ${{ defaults.version }}
+          tag_name: ${{ env.publish_version }}
+          release_name: ${{ env.publish_version }}
           body: ${{ steps.commit_msg_reader.outputs.messages }}
           draft: false
           prerelease: false
@@ -65,6 +65,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: out/*.nupkg
-          tag: ${{ defaults.version }}
+          tag: ${{ env.publish_version }}
           overwrite: true
           file_glob: true

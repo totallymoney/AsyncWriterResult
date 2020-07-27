@@ -39,11 +39,13 @@ jobs:
           -p:PackageVersion=${{ env.publish_version }} \
           -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
 
+      # --api-key ${{ secrets.NUGET_TOKEN }} \
+
       - run: |
           dotnet nuget push \
           out/*.nupkg \
-          --api-key ${{ secrets.NUGET_TOKEN }} \
-          --source https://www.nuget.org
+          --api-key ${{ secrets.GITHUB_TOKEN }} \
+          --source github
 
       - uses: actions/create-release@latest
         env:

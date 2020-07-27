@@ -1,6 +1,11 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - !master
+  pull_request:
+    - "*"
 
 jobs:
   build:
@@ -17,4 +22,5 @@ jobs:
           dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet tool restore
       - run: dotnet paket restore
-      - run: dotnet fake build -t Test
+      - run: dotnet build
+      - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests

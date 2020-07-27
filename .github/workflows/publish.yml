@@ -27,7 +27,7 @@ jobs:
       - id: commit_msg_reader
         run: |
           LATEST_TAG="$(git describe --tags --abbrev=0)"
-          MESSAGES_SINCE_TAG="$(git log $LATEST_TAG..$GITHUB_REF --format="%s <%an>")"
+          MESSAGES_SINCE_TAG="$(git log "$LATEST_TAG".."$GITHUB_REF" --format="%s <%an>")"
           echo "::set-output name=messages::$MESSAGES_SINCE_TAG"
 
       - run: dotnet build

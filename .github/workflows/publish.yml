@@ -23,15 +23,14 @@ jobs:
           dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet tool restore
       - run: dotnet paket restore
+      - run: dotnet build
+      - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests
 
       - id: commit_msg_reader
         run: |
           LATEST_TAG="$(git describe --tags --abbrev=0)"
           MESSAGES_SINCE_TAG="$(git log "$LATEST_TAG".."$GITHUB_SHA" --format="%s <%an>")"
           echo "::set-output name=messages::$MESSAGES_SINCE_TAG"
-
-      - run: dotnet build
-      - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests
 
       - run: |
           dotnet pack \
@@ -45,12 +44,6 @@ jobs:
           out/*.nupkg \
           --api-key ${{ secrets.NUGET_TOKEN }} \
           --source https://www.nuget.org
-
-      # - uses: mindsers/changelog-reader-action@v1.1.0
-      #   id: changelog_reader
-      #   with:
-      #     version: ${{ github.ref }}
-      #     path: ./CHANGELOG.md
 
       - uses: actions/create-release@latest
         env:

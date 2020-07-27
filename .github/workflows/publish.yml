@@ -6,7 +6,7 @@ on:
       - master
 
 env:
-  publish_version: 0.0.$GITHUB_RUN_NUMBER
+  publish_version: 0.0.${{ env.GITHUB_RUN_NUMBER }}
 
 jobs:
   build:
@@ -27,7 +27,8 @@ jobs:
       - id: commit_msg_reader
         run: |
           LATEST_TAG="$(git describe --tags --abbrev=0)"
-          echo "::set-output name=messages::git log $LATEST_TAG..${{ github.ref }} --format='%s <%an>'"
+          MESSAGES_SINCE_TAG="$(git log $LATEST_TAG..$GITHUB_REF --format="%s <%an>")"
+          echo "::set-output name=messages::$MESSAGES_SINCE_TAG"
 
       - run: dotnet build
       - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests

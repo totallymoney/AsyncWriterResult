@@ -6,7 +6,7 @@ on:
       - master
 
 env:
-  publish_version: 0.0.${{ env.GITHUB_RUN_NUMBER }}
+  publish_version: "0.0.$GITHUB_RUN_NUMBER"
 
 jobs:
   build:

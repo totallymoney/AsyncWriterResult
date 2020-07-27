@@ -1,6 +1,7 @@
 .fake/
 packages/
 paket-files/
+.paket/
 nupkg/
 bin/
 obj/

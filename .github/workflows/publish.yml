@@ -2,45 +2,69 @@ name: Publish
 
 on:
   push:
-    tags:
-      - "*" # Publish on any new tag
+    branches:
+      - master
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        dotnet: [3.1.201]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    defaults:
+      - version: 0.0.$GITHUB_RUN_NUMBER
+      - dotnet: 3.1.201
+    # strategy:
+    #   matrix:
+    #     os: [ubuntu-latest]
+    #     dotnet: [3.1.201]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ matrix.dotnet }}
+          dotnet-version: ${{ defaults.dotnet }}
       - run: dotnet tool restore
-      - run: dotnet paket config add-token 'https://www.nuget.org' '${{ secrets.NUGET_TOKEN }}'
-      - run: dotnet fake build
-      - run: dotnet fake build -t Release
-      - uses: mindsers/changelog-reader-action@v1.1.0
-        id: changelog_reader
-        with:
-          version: ${{ github.ref }}
-          path: ./CHANGELOG.md
+      - run: dotnet paket restore
+
+      - id: commit_msg_reader
+        run: |
+          LATEST_TAG="$(git describe --tags --abbrev=0)"
+          echo "::set-output name=messages::git log $LATEST_TAG..${{ github.ref }} --format='%s <%an>'"
+
+      - run: dotnet build
+      - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests
+
+      - run: |
+          dotnet pack \
+          --configuration Release \
+          --output ./out \
+          -p:PackageVersion=${{ defaults.version }} \
+          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
+
+      - run: |
+          dotnet nuget push \
+          out/*.nupkg \
+          --api-key ${{ secrets.NUGET_TOKEN }}
+          --source https://www.nuget.org
+
+      # - uses: mindsers/changelog-reader-action@v1.1.0
+      #   id: changelog_reader
+      #   with:
+      #     version: ${{ github.ref }}
+      #     path: ./CHANGELOG.md
+
       - uses: actions/create-release@latest
-        id: create_release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: ${{ steps.changelog_reader.outputs.log_entry }}
+          tag_name: ${{ defaults.version }}
+          release_name: ${{ defaults.version }}
+          body: ${{ steps.commit_msg_reader.outputs.messages }}
           draft: false
           prerelease: false
+
       - uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: out/*.nupkg
-          tag: ${{ github.ref }}
+          tag: ${{ defaults.version }}
           overwrite: true
           file_glob: true

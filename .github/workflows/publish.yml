@@ -41,7 +41,9 @@ jobs:
           --configuration Release \
           --output ./out \
           -p:PackageVersion=${{ env.publish_version }} \
-          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
+          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}" \
+          -p:RepositoryUrl=https://github.com/totallymoney/AsyncWriterResult \
+          -p:RepositoryType=git
 
       - run: dotnet nuget push ./out/*.nupkg
 

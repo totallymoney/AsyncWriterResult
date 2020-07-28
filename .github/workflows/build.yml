@@ -24,4 +24,4 @@ jobs:
       - run: dotnet tool restore
       - run: dotnet paket restore
       - run: dotnet build
-      - run: dotnet run -p ./tests/AsyncWriterResult.UnitTests
+      - run: dotnet run -p ./tests/**/*.fsproj

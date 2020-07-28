@@ -1,3 +1,8 @@
 {
-    "FSharp.useSdkScripts": true
+  "FSharp.useSdkScripts": true,
+  "FSharp.linter": true,
+  "[fsharp]": {
+    "editor.formatOnSave": true,
+    "editor.rulers": [80, 100]
+  }
 }

@@ -38,12 +38,10 @@ jobs:
 
       - run: |
           dotnet pack \
-          --configuration Release \
           --output ./out \
+          --configuration Release \
           -p:PackageVersion=${{ env.publish_version }} \
-          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}" \
-          -p:RepositoryUrl=https://github.com/totallymoney/AsyncWriterResult \
-          -p:RepositoryType=git
+          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
 
       - run: dotnet nuget push ./out/*.nupkg
 

@@ -21,6 +21,10 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ matrix.dotnet }}
+          source-url: https://nuget.pkg.github.com/totallymoney/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - run: dotnet tool restore
       - run: dotnet paket restore
       - run: dotnet build
@@ -39,13 +43,7 @@ jobs:
           -p:PackageVersion=${{ env.publish_version }} \
           -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
 
-      # --api-key ${{ secrets.NUGET_TOKEN }} \
-
-      - run: |
-          dotnet nuget push \
-          out/*.nupkg \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source "https://nuget.pkg.github.com/totallymoney/index.json"
+      - run: dotnet nuget push ./out/*.nupkg
 
       - uses: actions/create-release@latest
         env:

@@ -98,6 +98,10 @@ module WriterResult =
 
     let error e = Error e |> Writer.retn
 
+    let mapError e m =
+        let (r, logs) = Writer.run m
+        Writer <| fun () -> Result.mapError e r, logs
+
     // let bind (f:'a -> Writer<'b list, Result<'c,'d>>) (m:Writer<'b list, Result<'a,'d>>) : Writer<'b list, Result<'c,'d>> =
     let bind f m =
         let (r, logs1) = Writer.run m

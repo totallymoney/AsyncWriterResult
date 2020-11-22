@@ -157,6 +157,24 @@ module AsyncWriterResult =
             | Error e -> return Writer <| fun () -> Error e, logs1
         }
 
+    let apply f m =
+        async {
+            let! uf = f
+            let! um = m
+            let (r1, logs1) = Writer.run uf
+            let (r2, logs2) = Writer.run um
+            match r1, r2 with
+            | Ok g, Ok h -> return Writer <| fun () -> Ok(g h), logs1 @ logs2
+            | Error e1, _ -> return Writer <| fun () -> Error e1, logs1 @ logs2
+            | _, Error e2 -> return Writer <| fun () -> Error e2, logs1 @ logs2
+        }
+
+    module Operators =
+
+        let (<!>) = map
+        let (>>=) = bind
+        let (<*>) = apply
+
     let write log =
         async { return Writer(fun () -> Result.retn (), [ log ]) }
 

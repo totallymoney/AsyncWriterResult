@@ -64,7 +64,7 @@ type Writer<'w, 't> = Writer of (unit -> ('t * 'w))
 
 module Writer =
 
-    let run<'w, 't> (Writer w): 't * 'w = w ()
+    let run<'w, 't> (Writer w) : 't * 'w = w ()
 
     let retn a = Writer <| fun () -> a, []
 
@@ -80,6 +80,7 @@ module Writer =
     let apply f m =
         let (unwrappedF, logs1) = run f
         let (unwrappedA, logs2) = run m
+
         Writer
         <| fun () -> unwrappedF unwrappedA, logs1 @ logs2
 
@@ -105,6 +106,7 @@ module WriterResult =
     // let bind (f:'a -> Writer<'b list, Result<'c,'d>>) (m:Writer<'b list, Result<'a,'d>>) : Writer<'b list, Result<'c,'d>> =
     let bind f m =
         let (r, logs1) = Writer.run m
+
         match r with
         | Ok a ->
             let (b, logs2) = Writer.run (f a)
@@ -114,6 +116,7 @@ module WriterResult =
     let apply f m =
         let (r1, logs1) = Writer.run f
         let (r2, logs2) = Writer.run m
+
         match r1, r2 with
         | Ok g, Ok h -> Writer <| fun () -> Ok(g h), logs1 @ logs2
         | Error e1, _ -> Writer <| fun () -> Error e1, logs1 @ logs2
@@ -127,6 +130,7 @@ module WriterResult =
                 |> Result.bind (fun t -> Result.retn (h :: t)))
 
         let folder (items, logs) (item, log) = collectResult item items, log @ logs
+
         Writer
         <| fun () -> List.fold folder (Result.retn [], []) (List.map Writer.run list)
 
@@ -149,6 +153,7 @@ module AsyncWriterResult =
         async {
             let! w = m
             let (r, logs1) = Writer.run w
+
             match r with
             | Ok a ->
                 let! ww = f a
@@ -163,6 +168,7 @@ module AsyncWriterResult =
             let! um = m
             let (r1, logs1) = Writer.run uf
             let (r2, logs2) = Writer.run um
+
             match r1, r2 with
             | Ok g, Ok h -> return Writer <| fun () -> Ok(g h), logs1 @ logs2
             | Error e1, _ -> return Writer <| fun () -> Error e1, logs1 @ logs2

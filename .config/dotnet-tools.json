@@ -9,9 +9,15 @@
       ]
     },
     "fornax": {
-      "version": "0.13.1",
+      "version": "0.14.3",
       "commands": [
         "fornax"
+      ]
+    },
+    "fantomas-tool": {
+      "version": "4.7.9",
+      "commands": [
+        "fantomas"
       ]
     }
   }

@@ -243,7 +243,6 @@ module AsyncWriterResult =
 type TaskWriterResult<'ok, 'error, 'log> = Task<Writer<'log list, Result<'ok, 'error>>>
 
 
-[<AutoOpen>]
 module TaskWriterResult =
 
     let retn x = x |> WriterResult.retn |> Task.retn

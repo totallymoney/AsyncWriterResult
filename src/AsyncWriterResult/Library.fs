@@ -218,6 +218,8 @@ module AsyncWriter =
 
     let retn a = Writer.retn a |> Async.retn
 
+    let map f = f |> Writer.map |> Async.map
+
 
 type ResultBuilder() =
     member __.Return(x) = Result.retn x
@@ -242,8 +244,15 @@ type WriterResultBuilder() =
     member __.ReturnFrom(m: Writer<'w, Result<'a, 'b>>) = m
     member __.Bind(m, f) = WriterResult.bind f m
     member __.Zero() = __.Return()
+    member __.Source(x: Writer<'w, Result<'a, 'b>>) = x
 
 let writerResult = WriterResultBuilder()
+
+[<AutoOpen>]
+module WriterResultBuilderExtensions =
+    type WriterResultBuilder with
+        member __.Source(x: Result<'a, 'b>) = x |> Writer.retn
+        member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok
 
 
 type AsyncWriterResultBuilder() =
@@ -251,5 +260,16 @@ type AsyncWriterResultBuilder() =
     member __.ReturnFrom(m: Async<Writer<'w, Result<'a, 'b>>>) = m
     member __.Bind(m, f) = AsyncWriterResult.bind f m
     member __.Zero() = __.Return()
+    member __.Source(x: Async<Writer<'w, Result<'a, 'b>>>) = x
 
 let asyncWriterResult = AsyncWriterResultBuilder()
+
+[<AutoOpen>]
+module AsyncWriterResultBuilderExtensions =
+    type AsyncWriterResultBuilder with
+        member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Async.retn
+        member __.Source(x: Async<Result<'a, 'b>>) = x |> Async.map Writer.retn
+        member __.Source(x: Async<Writer<'w, 't>>) = x |> AsyncWriter.map Result.retn
+        member __.Source(x: Result<'a, 'b>) = x |> AsyncWriter.retn
+        member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok |> Async.retn
+        member __.Source(x: Async<'t>) = x |> Async.map WriterResult.retn

@@ -35,6 +35,8 @@ module TaskWriter =
 
     let retn a = Writer.retn a |> Task.retn
 
+    let map f = f |> Writer.map |> Task.map
+
 
 
 
@@ -110,5 +112,16 @@ module TaskWriterResult =
         member __.ReturnFrom(m: Task<Writer<'w, Result<'a, 'b>>>) = m
         member __.Bind(m, f) = bind f m
         member __.Zero() = __.Return()
+        member __.Source(x: Task<Writer<'w, Result<'a, 'b>>>) = x
 
     let taskWriterResult = TaskWriterResultBuilder()
+
+    [<AutoOpen>]
+    module TaskWriterResultBuilderExtensions =
+        type TaskWriterResultBuilder with
+            member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Task.retn
+            member __.Source(x: Task<Result<'a, 'b>>) = x |> Task.map Writer.retn
+            member __.Source(x: Task<Writer<'w, 't>>) = x |> TaskWriter.map Result.retn
+            member __.Source(x: Result<'a, 'b>) = x |> TaskWriter.retn
+            member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok |> Task.retn
+            member __.Source(x: Task<'t>) = x |> Task.map WriterResult.retn

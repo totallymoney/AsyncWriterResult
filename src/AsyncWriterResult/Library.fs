@@ -267,9 +267,13 @@ let asyncWriterResult = AsyncWriterResultBuilder()
 [<AutoOpen>]
 module AsyncWriterResultBuilderExtensions =
     type AsyncWriterResultBuilder with
-        member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Async.retn
-        member __.Source(x: Async<Result<'a, 'b>>) = x |> Async.map Writer.retn
-        member __.Source(x: Async<Writer<'w, 't>>) = x |> AsyncWriter.map Result.retn
         member __.Source(x: Result<'a, 'b>) = x |> AsyncWriter.retn
         member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok |> Async.retn
         member __.Source(x: Async<'t>) = x |> Async.map WriterResult.retn
+
+[<AutoOpen>]
+module AsyncWriterResultBuilderExtensionsHighPriority =
+    type AsyncWriterResultBuilder with
+        member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Async.retn
+        member __.Source(x: Async<Result<'a, 'b>>) = x |> Async.map Writer.retn
+        member __.Source(x: Async<Writer<'w, 't>>) = x |> AsyncWriter.map Result.retn

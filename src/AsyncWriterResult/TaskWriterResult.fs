@@ -119,9 +119,13 @@ module TaskWriterResult =
     [<AutoOpen>]
     module TaskWriterResultBuilderExtensions =
         type TaskWriterResultBuilder with
-            member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Task.retn
-            member __.Source(x: Task<Result<'a, 'b>>) = x |> Task.map Writer.retn
-            member __.Source(x: Task<Writer<'w, 't>>) = x |> TaskWriter.map Result.retn
             member __.Source(x: Result<'a, 'b>) = x |> TaskWriter.retn
             member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok |> Task.retn
             member __.Source(x: Task<'t>) = x |> Task.map WriterResult.retn
+
+    [<AutoOpen>]
+    module TaskWriterResultBuilderExtensionsHighPriority =
+        type TaskWriterResultBuilder with
+            member __.Source(x: Writer<'w, Result<'a, 'b>>) = x |> Task.retn
+            member __.Source(x: Task<Result<'a, 'b>>) = x |> Task.map Writer.retn
+            member __.Source(x: Task<Writer<'w, 't>>) = x |> TaskWriter.map Result.retn

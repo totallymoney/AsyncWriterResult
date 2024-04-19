@@ -27,6 +27,9 @@ module Async =
             return unwrappedF x
         }
 
+    let zip left right =
+        bind (fun l -> bind (fun r -> retn (l, r)) right) left
+
 
 module Result =
 
@@ -56,6 +59,11 @@ module Result =
 
         List.foldBack folder list (retn [])
 
+    let zip left right =
+        match left, right with
+        | Ok x1res, Ok x2res -> Ok(x1res, x2res)
+        | Error e, _ -> Error e
+        | _, Error e -> Error e
 
 
 type Writer<'w, 't> = Writer of (unit -> ('t * 'w))
@@ -85,6 +93,9 @@ module Writer =
     let collect l =
         Writer
         <| fun () -> List.fold (fun (items, logs) (item, log) -> item :: items, log :: logs) ([], []) (List.map run l)
+
+    let zip (left: Writer<_, _>) (right: Writer<_, _>) =
+        bind left (fun l -> bind right (fun r -> retn (l, r)))
 
     let write log = Writer <| fun () -> (), [ log ]
 
@@ -131,6 +142,10 @@ module WriterResult =
 
         Writer
         <| fun () -> List.fold folder (Result.retn [], []) (List.map Writer.run list)
+
+    let zip left right =
+        Writer.zip left right
+        |> Writer.map (fun (r1, r2) -> Result.zip r1 r2)
 
     let write log =
         Writer <| fun () -> Result.retn (), [ log ]
@@ -216,6 +231,11 @@ module AsyncWriterResult =
         Async.Parallel list
         |> Async.map (List.ofArray >> WriterResult.collect)
 
+    let zip left right =
+        Async.zip left right
+        |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+
+
 module AsyncWriter =
 
     let retn a = Writer.retn a |> Async.retn
@@ -228,6 +248,8 @@ type ResultBuilder() =
     member __.ReturnFrom(m: Result<_, _>) = m
     member __.Bind(m, f) = Result.bind f m
     member __.Zero() = Error()
+    member __.BindReturn(x, f) = Result.map f x
+    member __.MergeSources(x, y) = Result.zip x y
 
 let result = ResultBuilder()
 
@@ -237,6 +259,8 @@ type WriterBuilder() =
     member __.ReturnFrom(m: Writer<'w, 't>) = m
     member __.Bind(m, f) = Writer.bind m f
     member __.Zero() = __.Return()
+    member __.BindReturn(x, f) = Writer.map f x
+    member __.MergeSources(x, y) = Writer.zip x y
 
 let writer = WriterBuilder()
 
@@ -246,6 +270,8 @@ type WriterResultBuilder() =
     member __.ReturnFrom(m: Writer<'w, Result<'a, 'b>>) = m
     member __.Bind(m, f) = WriterResult.bind f m
     member __.Zero() = __.Return()
+    member __.BindReturn(x, f) = WriterResult.map f x
+    member __.MergeSources(x, y) = WriterResult.zip x y
     member __.Source(x: Writer<'w, Result<'a, 'b>>) = x
 
 let writerResult = WriterResultBuilder()
@@ -262,6 +288,8 @@ type AsyncWriterResultBuilder() =
     member __.ReturnFrom(m: Async<Writer<'w, Result<'a, 'b>>>) = m
     member __.Bind(m, f) = AsyncWriterResult.bind f m
     member __.Zero() = __.Return()
+    member __.BindReturn(x, f) = AsyncWriterResult.map f x
+    member __.MergeSources(x, y) = AsyncWriterResult.zip x y
     member __.Source(x: Async<Writer<'w, Result<'a, 'b>>>) = x
     member __.Source(x: Task<Writer<'w, Result<'a, 'b>>>) = x |> Async.AwaitTask
 

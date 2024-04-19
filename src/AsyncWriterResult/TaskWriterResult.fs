@@ -29,6 +29,9 @@ module Task =
             return unwrappedF x
         }
 
+    let zip left right =
+        bind (fun l -> bind (fun r -> retn (l, r)) right) left
+
 
 
 module TaskWriter =
@@ -36,7 +39,6 @@ module TaskWriter =
     let retn a = Writer.retn a |> Task.retn
 
     let map f = f |> Writer.map |> Task.map
-
 
 
 
@@ -107,11 +109,17 @@ module TaskWriterResult =
         Task.WhenAll tasks
         |> Task.map (List.ofArray >> WriterResult.collect)
 
+    let zip left right =
+        Task.zip left right
+        |> Task.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+
     type TaskWriterResultBuilder() =
         member __.Return(x) = retn x
         member __.ReturnFrom(m: Task<Writer<'w, Result<'a, 'b>>>) = m
         member __.Bind(m, f) = bind f m
         member __.Zero() = __.Return()
+        member __.BindReturn(x, f) = map f x
+        member __.MergeSources(x, y) = zip x y
         member __.Source(x: Task<Writer<'w, Result<'a, 'b>>>) = x
         member __.Source(x: Async<Writer<'w, Result<'a, 'b>>>) = x |> Async.StartAsTask
 

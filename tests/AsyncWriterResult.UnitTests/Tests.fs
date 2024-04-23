@@ -49,7 +49,7 @@ let tests =
                       }
                   return ()
               }
-              |> _.Result
+              |> fun x -> x.Result
               |> ignore
 
               Expect.equal acc [1; 3; 4; 2] ""

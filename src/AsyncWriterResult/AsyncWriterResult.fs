@@ -1,19 +1,19 @@
 namespace AsyncWriterResult
 
-open System.Threading.Tasks
 open FsToolkit.ErrorHandling
 
-type TaskWriterResult<'ok, 'error, 'log> = Task<Writer<'log list, Result<'ok, 'error>>>
+type AsyncWriterResult<'ok, 'error, 'log> = Async<Writer<'log list, Result<'ok, 'error>>>
 
 [<RequireQualifiedAccess>]
-module TaskWriterResult =
+module AsyncWriterResult =
 
-    let retn x = x |> WriterResult.retn |> Task.retn
+    let retn x = x |> WriterResult.retn |> Async.retn
 
-    let map f = f |> WriterResult.map |> Task.map
+    let map f = f |> WriterResult.map |> Async.map
 
+    // let bind (f:'a -> Async<Writer<'b list, Result<'c,'d>>>) (m:Async<Writer<'b list, Result<'a,'d>>>) : Async<Writer<'b list, Result<'c,'d>>> = async {
     let bind f m =
-        task {
+        async {
             let! w = m
             let r, logs1 = Writer.run w
 
@@ -26,7 +26,7 @@ module TaskWriterResult =
         }
 
     let apply f m =
-        task {
+        async {
             let! uf = f
             let! um = m
             let r1, logs1 = Writer.run uf
@@ -39,14 +39,25 @@ module TaskWriterResult =
         }
 
     let write log =
-        task { return Writer(fun () -> Result.retn (), [ log ]) }
+        async { return Writer(fun () -> Result.retn (), [ log ]) }
 
     let mapError e m =
-        task {
+        async {
             let! w = m
-            let r, logs = Writer.run w
+            let (r, logs) = Writer.run w
             return Writer <| fun () -> Result.mapError e r, logs
         }
+
+    let private errMsg m (e: exn) = Error(sprintf "%s: %s" m e.Message)
+
+    let tryTo desc f =
+        f
+        >> Async.Catch
+        >> Async.map (function
+            | Choice1Of2 a -> Ok a
+            | Choice2Of2 e when (e :? System.AggregateException) -> errMsg desc e.InnerException
+            | Choice2Of2 e -> errMsg desc e)
+        >> Async.map Writer.retn
 
     let traverseResultM f list =
 
@@ -60,10 +71,10 @@ module TaskWriterResult =
 
         List.foldBack folder list (retn [])
 
-    let collect (tasks: TaskWriterResult<_, _, _> seq) =
-        Task.WhenAll tasks
-        |> Task.map (List.ofArray >> WriterResult.collect)
+    let collect list =
+        Async.Parallel list
+        |> Async.map (List.ofArray >> WriterResult.collect)
 
     let zip left right =
-        Task.zip left right
-        |> Task.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+        Async.zip left right
+        |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)

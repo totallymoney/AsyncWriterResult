@@ -8,6 +8,7 @@ obj/
 release.cmd
 release.sh
 .ionide/
+.idea/
 _public
 build/
 out/

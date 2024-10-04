@@ -44,7 +44,7 @@ module AsyncWriterResult =
     let mapError e m =
         async {
             let! w = m
-            let (r, logs) = Writer.run w
+            let r, logs = Writer.run w
             return Writer <| fun () -> Result.mapError e r, logs
         }
 

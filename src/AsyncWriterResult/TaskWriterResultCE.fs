@@ -7,12 +7,12 @@ open System.Threading.Tasks
 module TaskWriterResultCE =
 
     type TaskWriterResultBuilder() =
-        member __.Return(x) = Task.retn x
+        member __.Return(x) = TaskWriterResult.retn x
         member __.ReturnFrom(m: Task<Writer<'w, Result<'a, 'b>>>) = m
-        member __.Bind(m, f) = Task.bind f m
+        member __.Bind(m, f) = TaskWriterResult.bind f m
         member __.Zero() = __.Return()
-        member __.BindReturn(x, f) = Task.map f x
-        member __.MergeSources(x, y) = Task.zip x y
+        member __.BindReturn(x, f) = TaskWriterResult.map f x
+        member __.MergeSources(x, y) = TaskWriterResult.zip x y
         member __.Source(x: Task<Writer<'w, Result<'a, 'b>>>) = x
         member __.Source(x: Async<Writer<'w, Result<'a, 'b>>>) = x |> Async.StartAsTask
 

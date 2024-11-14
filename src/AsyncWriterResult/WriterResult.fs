@@ -7,12 +7,14 @@ module WriterResult =
 
     let retn x = x |> Result.retn |> Writer.retn
 
-    let map f = f |> Result.map |> Writer.map
+    let returnError e = Error e |> Writer.retn
 
-    let error e = Error e |> Writer.retn
+    let map x = Result.map x |> Writer.map
 
     let mapError f m =
         Writer.map (Result.mapError f) m
+
+    let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map
 
     // let bind (f:'a -> Writer<'b list, Result<'c,'d>>) (m:Writer<'b list, Result<'a,'d>>) : Writer<'b list, Result<'c,'d>> =
     let bind f m =

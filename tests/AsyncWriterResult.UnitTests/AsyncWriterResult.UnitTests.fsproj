@@ -11,7 +11,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="AsyncWriterResultTests.fs" />
+    <Compile Include="TaskWriterResultTests.fs" />
+    <Compile Include="ListTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

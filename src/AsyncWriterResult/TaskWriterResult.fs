@@ -3,14 +3,16 @@ namespace AsyncWriterResult
 open System.Threading.Tasks
 open FsToolkit.ErrorHandling
 
-type TaskWriterResult<'ok, 'error, 'log> = Task<Writer<'log list, Result<'ok, 'error>>>
-
 [<RequireQualifiedAccess>]
 module TaskWriterResult =
 
     let retn x = x |> WriterResult.retn |> Task.retn
 
+    let returnError e = Error e |> TaskWriter.retn
+
     let map f = f |> WriterResult.map |> Task.map
+
+    let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map |> Task.map
 
     let bind f m =
         task {

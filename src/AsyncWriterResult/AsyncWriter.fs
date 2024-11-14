@@ -20,7 +20,7 @@ module AsyncWriter =
             let b, logsB = Writer.run writerB
 
             return Writer <| fun () -> b, logsA @ logsB
-        } // TODO: test
+        }
 
     let zip left right =
         Async.zip left right

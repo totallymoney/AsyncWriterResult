@@ -20,7 +20,7 @@ module TaskWriter =
             let b, logsB = Writer.run writerB
 
             return Writer <| fun () -> b, logsA @ logsB
-        } // TODO: test
+        }
 
     let zip left right =
         Task.zip left right

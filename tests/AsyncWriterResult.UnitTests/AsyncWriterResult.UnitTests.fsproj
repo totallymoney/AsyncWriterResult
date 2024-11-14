@@ -12,6 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="AsyncWriterTests.fs" />
+    <Compile Include="TaskWriterTests.fs" />
     <Compile Include="AsyncWriterResultTests.fs" />
     <Compile Include="TaskWriterResultTests.fs" />
     <Compile Include="ListTests.fs" />

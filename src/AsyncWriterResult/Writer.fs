@@ -39,3 +39,5 @@ module Writer =
         bind left (fun l -> bind right (fun r -> retn (l, r)))
 
     let write x = Writer <| fun () -> (), [ x ]
+
+    let ignore x = map ignore x

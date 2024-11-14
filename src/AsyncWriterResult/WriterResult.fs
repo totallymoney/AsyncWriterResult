@@ -53,3 +53,5 @@ module WriterResult =
 
     let write log =
         Writer <| fun () -> Result.retn (), [ log ]
+
+    let ignore x = map ignore x

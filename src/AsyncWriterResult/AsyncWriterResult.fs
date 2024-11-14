@@ -81,3 +81,5 @@ module AsyncWriterResult =
     let zip left right =
         Async.zip left right
         |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+
+    let ignore x = map ignore x

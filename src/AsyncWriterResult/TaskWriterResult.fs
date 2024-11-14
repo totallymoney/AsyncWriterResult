@@ -69,3 +69,5 @@ module TaskWriterResult =
     let zip left right =
         Task.zip left right
         |> Task.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+
+    let ignore x = map ignore x

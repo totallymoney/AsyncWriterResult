@@ -1,6 +1,7 @@
 namespace AsyncWriterResult
 
 open FsToolkit.ErrorHandling
+open AsyncWriterResult
 
 type AsyncWriterResult<'ok, 'error, 'log> = Async<Writer<'log list, Result<'ok, 'error>>>
 

@@ -1,7 +1,7 @@
 module Tests
 
 open Expecto
-open Task.TaskWriterResult
+open AsyncWriterResult
 
 let tests =
     testList "Group of tests"

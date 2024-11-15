@@ -1,17 +1,23 @@
 namespace AsyncWriterResult
 
-type Writer<'w, 't> = Writer of (unit -> 't * 'w)
-
 [<RequireQualifiedAccess>]
 module Writer =
 
-    let run<'w, 't> (Writer w) : 't * 'w = w ()
+    let run<'w, 't> (Writer w) : 't * 'w list = w ()
 
     let retn a = Writer <| fun () -> a, []
 
     let map f m =
         let a, w = run m
         Writer <| fun () -> f a, w
+        
+    let mapLogs f m =
+        let a, w = run m
+        Writer <| fun () -> a, f w
+
+    let eitherMap logMapper itemMapper m =
+        let a, w = run m
+        Writer <| fun () -> itemMapper a, logMapper w
 
     let bind m f =
         let a, logs1 = run m
@@ -33,3 +39,5 @@ module Writer =
         bind left (fun l -> bind right (fun r -> retn (l, r)))
 
     let write x = Writer <| fun () -> (), [ x ]
+
+    let ignore x = map ignore x

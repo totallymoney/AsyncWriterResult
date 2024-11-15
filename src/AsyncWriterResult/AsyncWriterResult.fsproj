@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Types.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Async.fs" />
     <Compile Include="Task.fs" />
@@ -12,7 +13,9 @@
     <Compile Include="WriterCE.fs" />
     <Compile Include="WriterOp.fs" />
     <Compile Include="AsyncWriter.fs" />
+    <Compile Include="AsyncWriterCE.fs" />
     <Compile Include="TaskWriter.fs" />
+    <Compile Include="TaskWriterCE.fs" />
     <Compile Include="WriterResult.fs" />
     <Compile Include="WriterResultCE.fs" />
     <Compile Include="WriterResultOp.fs" />
@@ -22,6 +25,7 @@
     <Compile Include="TaskWriterResult.fs" />
     <Compile Include="TaskWriterResultCE.fs" />
     <Compile Include="TaskWriterResultOp.fs" />
+    <Compile Include="List.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

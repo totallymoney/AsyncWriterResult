@@ -3,14 +3,16 @@ namespace AsyncWriterResult
 open FsToolkit.ErrorHandling
 open AsyncWriterResult
 
-type AsyncWriterResult<'ok, 'error, 'log> = Async<Writer<'log list, Result<'ok, 'error>>>
-
 [<RequireQualifiedAccess>]
 module AsyncWriterResult =
 
     let retn x = x |> WriterResult.retn |> Async.retn
 
+    let returnError e = Error e |> AsyncWriter.retn
+
     let map f = f |> WriterResult.map |> Async.map
+
+    let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map |> Async.map
 
     // let bind (f:'a -> Async<Writer<'b list, Result<'c,'d>>>) (m:Async<Writer<'b list, Result<'a,'d>>>) : Async<Writer<'b list, Result<'c,'d>>> = async {
     let bind f m =
@@ -79,3 +81,5 @@ module AsyncWriterResult =
     let zip left right =
         Async.zip left right
         |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+
+    let ignore x = map ignore x

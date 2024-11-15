@@ -5,6 +5,7 @@ open System.Threading.Tasks
 
 [<AutoOpen>]
 module AsyncWriterResultCE =
+
     type AsyncWriterResultBuilder() =
         member __.Return(x) = AsyncWriterResult.retn x
         member __.ReturnFrom(m: Async<Writer<'w, Result<'a, 'b>>>) = m

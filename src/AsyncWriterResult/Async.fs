@@ -1,5 +1,7 @@
 namespace AsyncWriterResult
 
+open FsToolkit.ErrorHandling
+
 [<RequireQualifiedAccess>]
 module Async =
 
@@ -12,3 +14,7 @@ module Async =
             let! y' = Async.AwaitTask y
             return x', y'
         }
+
+    let catchResult task =
+        Async.Catch task |> Async.map Result.ofChoice
+        

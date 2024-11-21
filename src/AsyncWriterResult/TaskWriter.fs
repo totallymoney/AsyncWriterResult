@@ -27,7 +27,7 @@ module TaskWriter =
 
     let bindError f = Task.map (Result.bindError f)
 
-    let mapBind (binder: 'a -> Writer<'w list, 'b>) (input: Task<Writer<'w list, 'a>>) =
+    let mapBind (binder: 'a -> Writer<'log, 'b>) (input: TaskWriter<'log, 'a>) : TaskWriter<'log, 'b> =
         input |> Task.map (fun x -> Writer.bind x binder)
 
     let zip left right =

@@ -26,7 +26,7 @@ module AsyncWriter =
 
     let bindError f = Async.map (Result.bindError f)
 
-    let mapBind (binder: 'a -> Writer<'w list, 'b>) (input: Async<Writer<'w list, 'a>>) =
+    let mapBind (binder: 'a -> Writer<'log, 'b>) (input: AsyncWriter<'log, 'a>) : AsyncWriter<'log, 'b> =
         input |> Async.map (fun x -> Writer.bind x binder)
 
     let zip left right =

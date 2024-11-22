@@ -26,6 +26,8 @@ module WriterResult =
             Writer <| fun () -> b, logs1 @ logs2
         | Error e -> Writer <| fun () -> Error e, logs1
 
+    let bindError f = Writer.map (Result.bindError f)
+
     let apply f m =
         let r1, logs1 = Writer.run f
         let r2, logs2 = Writer.run m

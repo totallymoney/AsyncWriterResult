@@ -27,6 +27,8 @@ module TaskWriterResult =
             | Error e -> return Writer <| fun () -> Error e, logs1
         }
 
+    let bindError f = TaskWriter.map (Result.bindError f)
+
     let apply f m =
         task {
             let! uf = f

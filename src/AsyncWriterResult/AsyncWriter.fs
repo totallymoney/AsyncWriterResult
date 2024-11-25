@@ -24,8 +24,6 @@ module AsyncWriter =
             return Writer <| fun () -> b, logsA @ logsB
         }
 
-    let bindError f = Async.map (Result.bindError f)
-
     let mapBind (binder: 'a -> Writer<'log, 'b>) (input: AsyncWriter<'log, 'a>) : AsyncWriter<'log, 'b> =
         input |> Async.map (fun x -> Writer.bind x binder)
 

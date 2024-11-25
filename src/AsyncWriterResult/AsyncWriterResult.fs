@@ -28,6 +28,8 @@ module AsyncWriterResult =
             | Error e -> return Writer <| fun () -> Error e, logs1
         }
 
+    let bindError f = AsyncWriter.map (Result.bindError f)
+
     let apply f m =
         async {
             let! uf = f

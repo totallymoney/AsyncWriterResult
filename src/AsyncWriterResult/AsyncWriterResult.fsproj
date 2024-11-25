@@ -14,8 +14,10 @@
     <Compile Include="WriterOp.fs" />
     <Compile Include="AsyncWriter.fs" />
     <Compile Include="AsyncWriterCE.fs" />
+    <Compile Include="AsyncResult.fs" />
     <Compile Include="TaskWriter.fs" />
     <Compile Include="TaskWriterCE.fs" />
+    <Compile Include="TaskResult.fs" />
     <Compile Include="WriterResult.fs" />
     <Compile Include="WriterResultCE.fs" />
     <Compile Include="WriterResultOp.fs" />

@@ -1,6 +1,5 @@
 namespace AsyncWriterResult
 
-open System.Threading.Tasks
 open FsToolkit.ErrorHandling
 
 [<RequireQualifiedAccess>]
@@ -24,8 +23,6 @@ module TaskWriter =
 
             return Writer <| fun () -> b, logsA @ logsB
         }
-
-    let bindError f = Task.map (Result.bindError f)
 
     let mapBind (binder: 'a -> Writer<'log, 'b>) (input: TaskWriter<'log, 'a>) : TaskWriter<'log, 'b> =
         input |> Task.map (fun x -> Writer.bind x binder)

@@ -28,6 +28,21 @@ let ceTests =
           |> ignore
 
           Expect.equal "" [1; 3; 4; 2] acc
+      }
+
+      test "can be used in a for loop" {
+          let aw =
+              asyncWriterResult {
+                  for i in [ 1; 2; 3; 4 ] do
+                        do! Writer.write i
+              }
+
+          let _, actualWritten =
+              aw
+              |> Async.RunSynchronously
+              |> Writer.run
+
+          Expect.equal "written" [ 1; 2; 3; 4 ] actualWritten
       } ]
 
 [<Tests>]

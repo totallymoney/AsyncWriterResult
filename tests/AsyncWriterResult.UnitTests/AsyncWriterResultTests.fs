@@ -34,7 +34,7 @@ let ceTests =
           let aw =
               asyncWriterResult {
                   for i in [ 1; 2; 3; 4 ] do
-                        do! Writer.write i
+                      do! Writer.write i
               }
 
           let _, actualWritten =
@@ -43,6 +43,22 @@ let ceTests =
               |> Writer.run
 
           Expect.equal "written" [ 1; 2; 3; 4 ] actualWritten
+      }
+      
+      test "can use if-return" {
+          let aw x =
+              asyncWriterResult {
+                  if x then
+                      do! Writer.write 1
+                  return Writer.write 0
+              }
+
+          let _, actualWritten =
+              aw true
+              |> Async.RunSynchronously
+              |> Writer.run
+
+          Expect.equal "written" [ 1 ] actualWritten
       } ]
 
 [<Tests>]

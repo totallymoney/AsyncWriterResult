@@ -17,6 +17,13 @@ module AsyncWriterResultCE =
         member _.Delay(generator: unit -> Async<Writer<'log,Result<'ok, 'error>>>) : Async<Writer<'log,Result<'ok,'error>>> =
             async.Delay generator
 
+        member inline this.Combine
+            (
+                computation1: Async<Writer<'log, Result<unit, 'error>>>,
+                computation2: Async<Writer<'log, Result<'ok, 'error>>>
+            ) : Async<Writer<'log, Result<'ok, 'error>>> =
+            this.Bind (computation1, (fun () -> computation2))
+
         member inline _.TryFinally
             (computation: Async<Writer<'log,Result<'ok,'error>>>, [<InlineIfLambda>] compensation: unit -> unit)
             : Async<Writer<'log,Result<'ok,'error>>> =

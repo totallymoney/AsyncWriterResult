@@ -10,11 +10,9 @@ NUGET
       FsCheck (>= 2.14.3)
     FsCheck (2.16.5)
       FSharp.Core (>= 4.2.3)
-    FSharp.Core (6.0.6)
-    FsToolkit.ErrorHandling (3.2)
-      FSharp.Core (>= 6.0.3)
-    FsToolkit.ErrorHandling.TaskResult (3.2)
-      FsToolkit.ErrorHandling (>= 3.2)
+    FSharp.Core (9.0.300)
+    FsToolkit.ErrorHandling (5.0)
+      FSharp.Core (>= 6.0.4)
     Mono.Cecil (0.11.4)
 
 GROUP Docs

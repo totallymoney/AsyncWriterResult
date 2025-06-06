@@ -5,7 +5,6 @@ framework: auto-detect
 
 nuget FSharp.Core
 nuget FsToolkit.ErrorHandling
-nuget FsToolkit.ErrorHandling.TaskResult
 nuget Expecto
 nuget FsCheck
 nuget Expecto.FsCheck

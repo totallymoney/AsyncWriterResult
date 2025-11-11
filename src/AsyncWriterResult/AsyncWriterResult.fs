@@ -6,7 +6,7 @@ open AsyncWriterResult
 [<RequireQualifiedAccess>]
 module AsyncWriterResult =
 
-    let retn x = x |> WriterResult.retn |> Async.retn
+    let retn x = x |> WriterResult.retn |> Async.singleton
 
     let returnError e = Error e |> AsyncWriter.retn
 

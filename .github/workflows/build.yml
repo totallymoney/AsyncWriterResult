@@ -2,11 +2,10 @@ name: Build
 
 on:
   push:
-    branches-ignore:
-      - master
-  pull_request:
-    branches:
-      - "*"
+    branches: [ 'main' ]
+#    paths-ignore: [ 'docs/**' ]
+
+permissions: write-all
 
 jobs:
   build:

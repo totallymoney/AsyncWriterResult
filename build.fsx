@@ -32,7 +32,7 @@ pipeline "ci" {
 
     stage "lint" {
         run "dotnet tool restore"
-        run $"dotnet fantomas {__SOURCE_FILE__} src docs"
+        run $"dotnet fantomas --check {__SOURCE_FILE__} src docs"
     }
 
     stage "build" {
@@ -46,6 +46,11 @@ pipeline "ci" {
     }
 
     stage "pack" { run $"dotnet pack {sln} -c {config} -p:PackageOutputPath=\"%s{nupkgs}\" {versionProperty}" }
+
+    stage "docs" {
+        run $"dotnet publish src/AsyncWriterResult/AsyncWriterResult.fsproj -c {config} -f net8.0 --no-build"
+        run $"dotnet fsdocs build --properties Configuration={config} --output output --eval --strict"
+    }
 
     runIfOnlySpecified false
 }

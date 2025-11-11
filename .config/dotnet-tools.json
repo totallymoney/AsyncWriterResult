@@ -3,22 +3,25 @@
   "isRoot": true,
   "tools": {
     "paket": {
-      "version": "7.1.5",
+      "version": "9.0.2",
       "commands": [
         "paket"
-      ]
+      ],
+      "rollForward": false
     },
-    "fornax": {
-      "version": "0.14.3",
+    "fsdocs-tool": {
+      "version": "20.0.1",
       "commands": [
-        "fornax"
-      ]
+        "fsdocs"
+      ],
+      "rollForward": false
     },
     "fantomas-tool": {
       "version": "4.7.9",
       "commands": [
         "fantomas"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }

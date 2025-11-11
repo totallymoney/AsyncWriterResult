@@ -1,7 +1,7 @@
 source https://api.nuget.org/v3/index.json
 
 storage: none
-framework: auto-detect
+framework: net8.0
 
 nuget FSharp.Core
 nuget FsToolkit.ErrorHandling
@@ -13,7 +13,7 @@ nuget Expecto.FsCheck
 group Docs
   source https://api.nuget.org/v3/index.json
 
-  framework: auto-detect
+  framework: net8.0
   storage: symlink
 
   nuget FSharp.Compiler.Service

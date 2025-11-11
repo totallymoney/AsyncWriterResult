@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ 'master' ]
 #    paths-ignore: [ 'docs/**' ]
 
 permissions: write-all
@@ -32,6 +32,9 @@ jobs:
           cache: true
           cache-dependency-path: paket.lock
 
+      - name: Restore tools
+        run: dotnet tool restore
+
       - name: Build
         run: dotnet fsi build.fsx
 
@@ -59,3 +62,67 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: success()
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set build version
+        run: |
+          BUILD_VERSION=1.0.${{ github.run_number }}
+          echo "Build version is $BUILD_VERSION"
+          echo "BUILD_VERSION=$BUILD_VERSION" >> "$GITHUB_ENV"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages-ubuntu-latest
+          path: nupkgs/
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x.x"
+
+      - name: Push packages to NuGet.org
+        run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source https://www.nuget.org --skip-duplicate
+
+      - name: Read commit messages since last tag
+        id: commit_msg_reader
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          if git tag --list | grep -q .; then
+            LATEST_TAG="$(git describe --tags --abbrev=0)"
+            MESSAGES_SINCE_TAG="$(git log "$LATEST_TAG"..HEAD --format="%s <%an>")"
+          else
+            MESSAGES_SINCE_TAG="$(git log --format="%s <%an>")"
+          fi
+          echo "messages<<__EOF__" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGES_SINCE_TAG" >> "$GITHUB_OUTPUT"
+          echo "__EOF__" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.BUILD_VERSION }}
+          release_name: ${{ env.BUILD_VERSION }}
+          body: ${{ steps.commit_msg_reader.outputs.messages }}
+          draft: false
+          prerelease: false
+
+      - name: Upload package to GitHub Release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: nupkgs/*.nupkg
+          tag: ${{ env.BUILD_VERSION }}
+          overwrite: true
+          file_glob: true

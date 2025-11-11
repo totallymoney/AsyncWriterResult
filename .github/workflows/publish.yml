@@ -5,63 +5,64 @@ on:
     branches:
       - master
 
-env:
-  publish_version: 1.0.${{ github.run_number }}
-
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        dotnet: [6.0.401]
-    runs-on: ${{ matrix.os }}
-
+  publish:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ matrix.dotnet }}
-          source-url: https://nuget.pkg.github.com/totallymoney/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-      - run: dotnet tool restore
-      - run: dotnet paket restore
-      - run: dotnet build
-      - run: dotnet run -p ./tests/**/*.fsproj
-
-      - id: commit_msg_reader
+      - name: Set build version
         run: |
-          LATEST_TAG="$(git describe --tags --abbrev=0)"
-          MESSAGES_SINCE_TAG="$(git log "$LATEST_TAG".."$GITHUB_SHA" --format="%s <%an>")"
-          echo "::set-output name=messages::$MESSAGES_SINCE_TAG"
+          BUILD_VERSION=1.0.${{ github.run_number }}
+          echo "Build version is $BUILD_VERSION"
+          echo "BUILD_VERSION=$BUILD_VERSION" >> "$GITHUB_ENV"
 
-      - run: |
-          dotnet pack \
-          --output ./out \
-          --configuration Release \
-          -p:PackageVersion=${{ env.publish_version }} \
-          -p:PackageReleaseNotes="${{ steps.commit_msg_reader.outputs.messages }}"
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x.x"
+          cache: true
+          cache-dependency-path: paket.lock
 
-      - run: |
-          dotnet nuget push ./out/*.nupkg \
-          --api-key ${{ secrets.NUGET_TOKEN }} \
-          --source https://www.nuget.org
+      - name: Build, test and pack
+        run: dotnet fsi build.fsx
 
-      - uses: actions/create-release@latest
+      - name: Push packages to NuGet.org
+        run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source https://www.nuget.org --skip-duplicate
+
+      - name: Read commit messages since last tag
+        id: commit_msg_reader
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          if git tag --list | grep -q .; then
+            LATEST_TAG="$(git describe --tags --abbrev=0)"
+            MESSAGES_SINCE_TAG="$(git log "$LATEST_TAG"..HEAD --format="%s <%an>")"
+          else
+            MESSAGES_SINCE_TAG="$(git log --format="%s <%an>")"
+          fi
+          echo "messages<<__EOF__" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGES_SINCE_TAG" >> "$GITHUB_OUTPUT"
+          echo "__EOF__" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.publish_version }}
-          release_name: ${{ env.publish_version }}
+          tag_name: ${{ env.BUILD_VERSION }}
+          release_name: ${{ env.BUILD_VERSION }}
           body: ${{ steps.commit_msg_reader.outputs.messages }}
           draft: false
           prerelease: false
 
-      - uses: svenstaro/upload-release-action@v1-release
+      - name: Upload package to GitHub Release
+        uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: out/*.nupkg
-          tag: ${{ env.publish_version }}
+          file: nupkgs/*.nupkg
+          tag: ${{ env.BUILD_VERSION }}
           overwrite: true
           file_glob: true

@@ -3,9 +3,8 @@ source https://api.nuget.org/v3/index.json
 storage: none
 framework: net8.0
 
-nuget FSharp.Core
+nuget FSharp.Core ~> 8
 nuget FsToolkit.ErrorHandling
-nuget FsToolkit.ErrorHandling.TaskResult
 nuget Expecto
 nuget FsCheck
 nuget Expecto.FsCheck
@@ -14,8 +13,12 @@ group Docs
   source https://api.nuget.org/v3/index.json
 
   framework: net8.0
-  storage: symlink
+  storage: none
 
-  nuget FSharp.Compiler.Service
+  nuget FSharp.Core ~> 8
+  nuget FSharp.Compiler.Service ~> 43.8
   nuget FSharp.Formatting
   nuget Newtonsoft.Json
+  nuget System.Collections.Immutable ~> 8
+  nuget System.Reflection.Metadata ~> 8
+  nuget System.Diagnostics.DiagnosticSource ~> 8

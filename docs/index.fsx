@@ -41,10 +41,7 @@ let fetchUserWithLogs userId =
     }
 
 // Run it and see what happened
-let user, fetchLogs =
-    fetchUserWithLogs 123
-    |> Async.RunSynchronously
-    |> Writer.run
+let user, fetchLogs = fetchUserWithLogs 123 |> Async.RunSynchronously |> Writer.run
 
 printfn $"User: %A{user}"
 printfn $"What happened: %A{fetchLogs}"
@@ -83,13 +80,11 @@ let parseConfigFile filename =
 
 // Try with a missing file
 let configResult, configLogs =
-    parseConfigFile "missing.json"
-    |> Async.RunSynchronously
-    |> Writer.run
+    parseConfigFile "missing.json" |> Async.RunSynchronously |> Writer.run
 
 match configResult with
 | Ok config -> printfn $"Config loaded: %s{config}"
-| Error (msg: string) -> printfn $"Failed: %s{msg}"
+| Error(msg: string) -> printfn $"Failed: %s{msg}"
 
 printfn $"Log trail:\n%A{configLogs}"
 
@@ -105,11 +100,7 @@ let checkServiceHealth (url: string) =
     async {
         do! Async.Sleep 100 // simulate network call
 
-        return
-            if url.Contains "api" then
-                "healthy"
-            else
-                "degraded"
+        return if url.Contains "api" then "healthy" else "degraded"
     }
 
 let healthCheck () =
@@ -125,9 +116,7 @@ let healthCheck () =
         do! Writer.write $"[STATUS] Cache: {cacheStatus}"
 
         let allHealthy =
-            apiStatus = "healthy"
-            && dbStatus = "healthy"
-            && cacheStatus = "healthy"
+            apiStatus = "healthy" && dbStatus = "healthy" && cacheStatus = "healthy"
 
         if allHealthy then
             do! Writer.write "[OK] All systems operational"
@@ -138,13 +127,11 @@ let healthCheck () =
     }
 
 let healthResult, healthLogs =
-    healthCheck ()
-    |> Async.RunSynchronously
-    |> Writer.run
+    healthCheck () |> Async.RunSynchronously |> Writer.run
 
 match healthResult with
 | Ok status -> printfn $"Status: %s{status}"
-| Error (_: string) -> printfn "Health check failed"
+| Error(_: string) -> printfn "Health check failed"
 
 printfn $"\nHealth check log:\n%A{healthLogs}"
 
@@ -185,13 +172,11 @@ let orders =
         Amount = 150.00m } ]
 
 let orderResult, orderLogs =
-    processOrders orders
-    |> Async.RunSynchronously
-    |> Writer.run
+    processOrders orders |> Async.RunSynchronously |> Writer.run
 
 match orderResult with
 | Ok total -> printfn $"Total processed: $%.2f{total}"
-| Error (e: string) -> printfn $"Processing failed: %s{e}"
+| Error(e: string) -> printfn $"Processing failed: %s{e}"
 
 printfn "\nProcessing log:"
 orderLogs |> List.iter (printfn "  %s")
@@ -225,14 +210,10 @@ let processData (data: string) =
     }
 
 let pipeline input =
-    input
-    |> validateInput
-    |> AsyncWriter.bind processData
+    input |> validateInput |> AsyncWriter.bind processData
 
 let finalResult, pipelineLogs =
-    pipeline "test_data"
-    |> Async.RunSynchronously
-    |> Writer.run
+    pipeline "test_data" |> Async.RunSynchronously |> Writer.run
 
 printfn $"Result: %s{finalResult}"
 printfn "\nPipeline trace:"

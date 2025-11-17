@@ -28,7 +28,6 @@ module TaskWriter =
         input |> Task.map (fun x -> Writer.bind x binder)
 
     let zip left right =
-        Task.zip left right
-        |> Task.map (fun (r1, r2) -> Writer.zip r1 r2)
+        Task.zip left right |> Task.map (fun (r1, r2) -> Writer.zip r1 r2)
 
     let ignore x = map ignore x

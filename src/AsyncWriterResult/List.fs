@@ -3,15 +3,9 @@ namespace AsyncWriterResult
 [<RequireQualifiedAccess>]
 module List =
     (* Writer *)
-    let rec private traverseWriterA'
-        (state: Writer<_, _>)
-        (f: _ -> Writer<_, _>)
-        xs
-        =
+    let rec private traverseWriterA' (state: Writer<_, _>) (f: _ -> Writer<_, _>) xs =
         match xs with
-        | [] ->
-            state
-            |> Writer.map List.rev
+        | [] -> state |> Writer.map List.rev
         | x :: xs ->
             let w =
                 writer {
@@ -21,22 +15,16 @@ module List =
                 }
 
             traverseWriterA' w f xs
-    
+
     let traverseWriterA (f: 'a -> Writer<'log, 'b>) (xs: 'a list) : Writer<'log, 'b list> =
         traverseWriterA' (Writer.retn []) f xs
 
     let sequenceWriter xs = traverseWriterA id xs
 
     (* Async Writer *)
-    let rec private traverseAsyncWriterA'
-        (state: AsyncWriter<_, _>)
-        (f: _ -> AsyncWriter<_, _>)
-        xs
-        =
+    let rec private traverseAsyncWriterA' (state: AsyncWriter<_, _>) (f: _ -> AsyncWriter<_, _>) xs =
         match xs with
-        | [] ->
-            state
-            |> AsyncWriter.map List.rev
+        | [] -> state |> AsyncWriter.map List.rev
         | x :: xs ->
             let w =
                 asyncWriter {
@@ -53,15 +41,9 @@ module List =
     let sequenceAsyncWriter xs = traverseAsyncWriterA id xs
 
     (* Task Writer *)
-    let rec private traverseTaskWriterA'
-        (state: TaskWriter<_, _>)
-        (f: _ -> TaskWriter<_, _>)
-        xs
-        =
+    let rec private traverseTaskWriterA' (state: TaskWriter<_, _>) (f: _ -> TaskWriter<_, _>) xs =
         match xs with
-        | [] ->
-            state
-            |> TaskWriter.map List.rev
+        | [] -> state |> TaskWriter.map List.rev
         | x :: xs ->
             let w =
                 taskWriter {
@@ -78,15 +60,9 @@ module List =
     let sequenceTaskWriter xs = traverseTaskWriterA id xs
 
     (* Writer Result *)
-    let rec private traverseWriterResultM'
-        (state: WriterResult<_, _, _>)
-        (f: _ -> WriterResult<_, _, _>)
-        xs
-        =
+    let rec private traverseWriterResultM' (state: WriterResult<_, _, _>) (f: _ -> WriterResult<_, _, _>) xs =
         match xs with
-        | [] ->
-            state
-            |> WriterResult.map List.rev
+        | [] -> state |> WriterResult.map List.rev
         | x :: xs ->
             writer {
                 let! r =
@@ -101,21 +77,18 @@ module List =
                 | Error _ -> return r
             }
 
-    let traverseWriterResultM (f: 'a -> WriterResult<'b, 'error, 'log>) (xs: 'a list) : WriterResult<'b list, 'error, 'log> =
+    let traverseWriterResultM
+        (f: 'a -> WriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : WriterResult<'b list, 'error, 'log> =
         traverseWriterResultM' (WriterResult.retn []) f xs
 
     let sequenceWriterResultM xs = traverseWriterResultM id xs
 
 
-    let rec private traverseWriterResultA'
-        (state: WriterResult<_, _, _>)
-        (f: _ -> WriterResult<_, _, _>)
-        xs
-        =
+    let rec private traverseWriterResultA' (state: WriterResult<_, _, _>) (f: _ -> WriterResult<_, _, _>) xs =
         match xs with
-        | [] ->
-            state
-            |> WriterResult.eitherMap List.rev List.rev
+        | [] -> state |> WriterResult.eitherMap List.rev List.rev
         | x :: xs ->
             writer {
                 let! ys = state
@@ -123,14 +96,15 @@ module List =
 
                 match ys, y with
                 | Ok ys, Ok y -> return! traverseWriterResultA' (WriterResult.retn (y :: ys)) f xs
-                | Error errs, Error e ->
-                    return! traverseWriterResultA' (WriterResult.returnError (e :: errs)) f xs
-                | Ok _, Error e ->
-                    return! traverseWriterResultA' (WriterResult.returnError [ e ]) f xs
+                | Error errs, Error e -> return! traverseWriterResultA' (WriterResult.returnError (e :: errs)) f xs
+                | Ok _, Error e -> return! traverseWriterResultA' (WriterResult.returnError [ e ]) f xs
                 | Error e, Ok _ -> return! traverseWriterResultA' (WriterResult.returnError e) f xs
             }
 
-    let traverseWriterResultA (f: 'a -> WriterResult<'b, 'error, 'log>) (xs: 'a list) : WriterResult<'b list, 'error list, 'log> =
+    let traverseWriterResultA
+        (f: 'a -> WriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : WriterResult<'b list, 'error list, 'log> =
         traverseWriterResultA' (WriterResult.retn []) f xs
 
     let sequenceWriterResultA xs = traverseWriterResultA id xs
@@ -142,9 +116,7 @@ module List =
         xs
         =
         match xs with
-        | [] ->
-            state
-            |> AsyncWriterResult.map List.rev
+        | [] -> state |> AsyncWriterResult.map List.rev
         | x :: xs ->
             asyncWriter {
                 let! r =
@@ -159,7 +131,10 @@ module List =
                 | Error _ -> return r
             }
 
-    let traverseAsyncWriterResultM (f: 'a -> AsyncWriterResult<'b, 'error, 'log>) (xs: 'a list) : AsyncWriterResult<'b list, 'error, 'log> =
+    let traverseAsyncWriterResultM
+        (f: 'a -> AsyncWriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : AsyncWriterResult<'b list, 'error, 'log> =
         traverseAsyncWriterResultM' (AsyncWriterResult.retn []) f xs
 
     let sequenceAsyncWriterResultM xs = traverseAsyncWriterResultM id xs
@@ -171,9 +146,7 @@ module List =
         xs
         =
         match xs with
-        | [] ->
-            state
-            |> AsyncWriterResult.eitherMap List.rev List.rev
+        | [] -> state |> AsyncWriterResult.eitherMap List.rev List.rev
         | x :: xs ->
             asyncWriter {
                 let! ys = state
@@ -183,12 +156,14 @@ module List =
                 | Ok ys, Ok y -> return! traverseAsyncWriterResultA' (AsyncWriterResult.retn (y :: ys)) f xs
                 | Error errs, Error e ->
                     return! traverseAsyncWriterResultA' (AsyncWriterResult.returnError (e :: errs)) f xs
-                | Ok _, Error e ->
-                    return! traverseAsyncWriterResultA' (AsyncWriterResult.returnError [ e ]) f xs
+                | Ok _, Error e -> return! traverseAsyncWriterResultA' (AsyncWriterResult.returnError [ e ]) f xs
                 | Error e, Ok _ -> return! traverseAsyncWriterResultA' (AsyncWriterResult.returnError e) f xs
             }
 
-    let traverseAsyncWriterResultA (f: 'a -> AsyncWriterResult<'b, 'error, 'log>) (xs: 'a list) : AsyncWriterResult<'b list, 'error list, 'log> =
+    let traverseAsyncWriterResultA
+        (f: 'a -> AsyncWriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : AsyncWriterResult<'b list, 'error list, 'log> =
         traverseAsyncWriterResultA' (AsyncWriterResult.retn []) f xs
 
     let sequenceAsyncWriterResultA xs = traverseAsyncWriterResultA id xs
@@ -200,9 +175,7 @@ module List =
         xs
         =
         match xs with
-        | [] ->
-            state
-            |> TaskWriterResult.map List.rev
+        | [] -> state |> TaskWriterResult.map List.rev
         | x :: xs ->
             taskWriter {
                 let! r =
@@ -217,7 +190,10 @@ module List =
                 | Error _ -> return r
             }
 
-    let traverseTaskWriterResultM (f: 'a -> TaskWriterResult<'b, 'error, 'log>) (xs: 'a list) : TaskWriterResult<'b list, 'error, 'log> =
+    let traverseTaskWriterResultM
+        (f: 'a -> TaskWriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : TaskWriterResult<'b list, 'error, 'log> =
         traverseTaskWriterResultM' (TaskWriterResult.retn []) f xs
 
     let sequenceTaskWriterResultM xs = traverseTaskWriterResultM id xs
@@ -229,9 +205,7 @@ module List =
         xs
         =
         match xs with
-        | [] ->
-            state
-            |> TaskWriterResult.eitherMap List.rev List.rev
+        | [] -> state |> TaskWriterResult.eitherMap List.rev List.rev
         | x :: xs ->
             taskWriter {
                 let! ys = state
@@ -241,12 +215,14 @@ module List =
                 | Ok ys, Ok y -> return! traverseTaskWriterResultA' (TaskWriterResult.retn (y :: ys)) f xs
                 | Error errs, Error e ->
                     return! traverseTaskWriterResultA' (TaskWriterResult.returnError (e :: errs)) f xs
-                | Ok _, Error e ->
-                    return! traverseTaskWriterResultA' (TaskWriterResult.returnError [ e ]) f xs
+                | Ok _, Error e -> return! traverseTaskWriterResultA' (TaskWriterResult.returnError [ e ]) f xs
                 | Error e, Ok _ -> return! traverseTaskWriterResultA' (TaskWriterResult.returnError e) f xs
             }
 
-    let traverseTaskWriterResultA (f: 'a -> TaskWriterResult<'b, 'error, 'log>) (xs: 'a list) : TaskWriterResult<'b list, 'error list, 'log> =
+    let traverseTaskWriterResultA
+        (f: 'a -> TaskWriterResult<'b, 'error, 'log>)
+        (xs: 'a list)
+        : TaskWriterResult<'b list, 'error list, 'log> =
         traverseTaskWriterResultA' (TaskWriterResult.retn []) f xs
 
     let sequenceTaskWriterResultA xs = traverseTaskWriterResultA id xs

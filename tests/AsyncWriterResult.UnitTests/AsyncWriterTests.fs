@@ -23,18 +23,12 @@ let helperTests =
               }
 
           let actualValue, actualWritten =
-              AsyncWriter.bind binder aw
-              |> Async.RunSynchronously
-              |> Writer.run
+              AsyncWriter.bind binder aw |> Async.RunSynchronously |> Writer.run
 
           Expect.equal "value" 2 actualValue
-          Expect.equal "written" [1; 2; 3; 4] actualWritten
+          Expect.equal "written" [ 1; 2; 3; 4 ] actualWritten
       } ]
 
 [<Tests>]
 let tests =
-    testList "AsyncWriter" [
-        testList "Helpers" helperTests
-        testList "CE" []
-        testList "Operators" []
-    ]
+    testList "AsyncWriter" [ testList "Helpers" helperTests; testList "CE" []; testList "Operators" [] ]

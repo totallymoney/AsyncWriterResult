@@ -22,4 +22,3 @@ module TaskWriterBuilderExtensions =
     type TaskWriterBuilder with
         member __.Source(x: Writer<'w, 't>) = x |> Task.singleton
         member __.Source(x: Task<'a>) = x |> Task.map Writer.retn
-        

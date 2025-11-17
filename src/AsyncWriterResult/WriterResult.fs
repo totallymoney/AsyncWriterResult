@@ -11,8 +11,7 @@ module WriterResult =
 
     let map x = Result.map x |> Writer.map
 
-    let mapError f m =
-        Writer.map (Result.mapError f) m
+    let mapError f m = Writer.map (Result.mapError f) m
 
     let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map
 
@@ -40,9 +39,7 @@ module WriterResult =
     let collect list =
         let collectResult head tail =
             head
-            |> Result.bind (fun h ->
-                tail
-                |> Result.bind (fun t -> Result.retn (h :: t)))
+            |> Result.bind (fun h -> tail |> Result.bind (fun t -> Result.retn (h :: t)))
 
         let folder (items, logs) (item, log) = collectResult item items, log @ logs
 
@@ -50,8 +47,7 @@ module WriterResult =
         <| fun () -> List.fold folder (Result.retn [], []) (List.map Writer.run list)
 
     let zip left right =
-        Writer.zip left right
-        |> Writer.map (fun (r1, r2) -> Result.zip r1 r2)
+        Writer.zip left right |> Writer.map (fun (r1, r2) -> Result.zip r1 r2)
 
     let write log =
         Writer <| fun () -> Result.retn (), [ log ]

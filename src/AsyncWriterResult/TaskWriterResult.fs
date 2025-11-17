@@ -12,7 +12,8 @@ module TaskWriterResult =
 
     let map f = f |> WriterResult.map |> Task.map
 
-    let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map |> Task.map
+    let eitherMap fok ferr =
+        Result.eitherMap fok ferr |> Writer.map |> Task.map
 
     let bind f m =
         task {
@@ -59,17 +60,14 @@ module TaskWriterResult =
         let cons head tail = head :: tail
 
         let folder head tail =
-            f head
-            >>= (fun h -> tail >>= (fun t -> retn (cons h t)))
+            f head >>= (fun h -> tail >>= (fun t -> retn (cons h t)))
 
         List.foldBack folder list (retn [])
 
     let collect (tasks: TaskWriterResult<_, _, _> seq) =
-        Task.WhenAll tasks
-        |> Task.map (List.ofArray >> WriterResult.collect)
+        Task.WhenAll tasks |> Task.map (List.ofArray >> WriterResult.collect)
 
     let zip left right =
-        Task.zip left right
-        |> Task.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+        Task.zip left right |> Task.map (fun (r1, r2) -> WriterResult.zip r1 r2)
 
     let ignore x = map ignore x

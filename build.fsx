@@ -14,11 +14,7 @@ let nupkgs = __SOURCE_DIRECTORY__ </> "nupkgs"
 let envVar name =
     Environment.GetEnvironmentVariable(name)
     |> Option.ofObj
-    |> Option.bind (fun v ->
-        if String.IsNullOrWhiteSpace(v) then
-            None
-        else
-            Some v)
+    |> Option.bind (fun v -> if String.IsNullOrWhiteSpace(v) then None else Some v)
 
 let buildVersion = envVar "BUILD_VERSION"
 

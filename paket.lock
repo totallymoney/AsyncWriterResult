@@ -16,7 +16,7 @@ NUGET
     Mono.Cecil (0.11.6)
 
 GROUP Docs
-STORAGE: NONE
+STORAGE: SYMLINK
 RESTRICTION: == net8.0
 NUGET
   remote: https://api.nuget.org/v3/index.json

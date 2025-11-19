@@ -20,7 +20,7 @@ let buildVersion = envVar "BUILD_VERSION"
 
 let versionProperty =
     match buildVersion with
-    | None -> "-p:Version=1.0.0"
+    | None -> "-p:Version=2.0.0"
     | Some v -> $"-p:Version=%s{v}"
 
 pipeline "ci" {

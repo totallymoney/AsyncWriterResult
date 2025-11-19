@@ -14,16 +14,20 @@ jobs:
         os: [ubuntu-latest]
         dotnet: [8.0.x]
     runs-on: ${{ matrix.os }}
+    outputs:
+      build_version: ${{ steps.set_version.outputs.version }}
 
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
 
       - name: Set build version
+        id: set_version
         run: |
           BUILD_VERSION=2.0.${{ github.run_number }}
           echo "Build version is $BUILD_VERSION"
           echo "BUILD_VERSION=$BUILD_VERSION" >> "$GITHUB_ENV"
+          echo "version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -71,11 +75,10 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Set build version
+      - name: Use build version from build job
         run: |
-          BUILD_VERSION=1.0.${{ github.run_number }}
-          echo "Build version is $BUILD_VERSION"
-          echo "BUILD_VERSION=$BUILD_VERSION" >> "$GITHUB_ENV"
+          echo "Using build version from build job: ${{ needs.build.outputs.build_version }}"
+          echo "BUILD_VERSION=${{ needs.build.outputs.build_version }}" >> "$GITHUB_ENV"
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -123,6 +126,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: nupkgs/*.nupkg
+          asset_name: package
           tag: ${{ env.BUILD_VERSION }}
           overwrite: true
           file_glob: true

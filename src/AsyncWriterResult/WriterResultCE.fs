@@ -18,4 +18,3 @@ module WriterResultBuilderExtensions =
     type WriterResultBuilder with
         member __.Source(x: Result<'a, 'b>) = x |> Writer.retn
         member __.Source(x: Writer<'w, 't>) = x |> Writer.map Ok
-        

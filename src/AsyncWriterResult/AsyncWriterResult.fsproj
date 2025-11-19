@@ -2,9 +2,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RepositoryUrl>https://github.com/totallymoney/AsyncWriterResult</RepositoryUrl>
+    <PackageProjectUrl>https://totallymoney.github.io/AsyncWriterResult/</PackageProjectUrl>
+    <FsDocsLogoLink>https://github.com/totallymoney/AsyncWriterResult</FsDocsLogoLink>
+    <FsDocsLicenseLink>https://github.com/totallymoney/AsyncWriterResult/blob/master/LICENSE.md</FsDocsLicenseLink>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Types.fs" />

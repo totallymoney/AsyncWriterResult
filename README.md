@@ -1,85 +1,177 @@
 # AsyncWriterResult
 
-## How to get started
+Combine async workflows with structured logging and error handling in F#. Track what happens in your async code without the usual plumbing.
 
-1. Add links to GH project in all places marked `TODO: ADD_LINK`
-2. Add name of the author in all places marked `TODO: ADD_AUTHOR`
-3. Search for any other places marked with `TODO:` (especially in `build.fsx` script)
+## Installation
 
+Use any of the following options depending on your setup.
 
-## What's included
+- Dotnet CLI (recommended)
+  - Add to a project: `dotnet add package AsyncWriterResult`
+  - Or edit your `.fsproj` and include: `<PackageReference Include="AsyncWriterResult" Version="*" />`
 
-* Paket, FAKE, and Fornax added as `dotnet` local tools (`.config/dotnet-tools.json`)
-* `build.fsx` file, containing default FAKE script with targets for building, testing, documentation generation, publishing to GitHub, and publishing to NuGet
-* `paket.dependencies` with basic set of dependencies
-* `src` folder containing 2 projects - one class library (`netstandard2.0`), and CLI tool (`netcoreapp3.1`)
-* `test` folder containing UnitTest project using Expecto and FsCheck
-* `docs` folder with Fornax documentation template that will generate nice documentation for your project.
-* `.devcontainer` folder with definition of [Development Container](https://code.visualstudio.com/docs/remote/containers)
-* `.github/workflows` folder with definition for 3 GitHub actions - one for building and testing code as CI, one for creating new GH releases on new tags, one for deploying documentation when new tag is pushed. To use latter, you need to define `PERSONAL_TOKEN` secret in GitHub repo settings with Personal Access Token.
-* `.github/ISSUE_TEMPLATE` folder with 2 different issue templates - one for bug report, other one for feature request
+- Paket
+  - Add to dependencies: `paket add AsyncWriterResult`
+  - Or in `paket.dependencies`: `nuget AsyncWriterResult`
+  - Then run `paket install` and reference in your project file if needed.
 
-## How to build application
+- F# scripts (.fsx)
+  - Reference directly from NuGet: `#r "nuget: AsyncWriterResult"`
 
-1. Make sure you've installed .Net Core version defined in [global.json](global.json)
-2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `dotnet fake build` to build default target of [build script](build.fsx)
-4. To run tests use `dotnet fake build -t Test`
-5. To build documentation use `dotnet fake build -t Docs`
+## Quick Start
 
-## How to work with documentation
+### Writing async code that logs its work
 
-1. Make sure you've installed .Net Core version defined in [global.json](global.json)
-2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `dotnet fake build` to build default target of [build script](build.fsx)
-4. Build documentation to make sure everything is fine with `dotnet fake build -t Docs`
-5. Go to docs folder `cd docs` and start Fornax in watch mode `dotnet fornax watch`
-6. You documentation should be now accessible on `localhost:8080` and will be regenerated on every file save
+```fsharp
+open AsyncWriterResult
 
+type User = { Id: int; Name: string }
 
-## How to release.
+let fetchUserWithLogs userId =
+    asyncWriter {
+        do! Writer.write ($"[INFO] Fetching user {userId}")
 
-#### Releasing as part of the CI
+        // Simulate API call
+        let! user =
+            async {
+                do! Async.Sleep 200
+                return { Id = userId; Name = "Alice" }
+            }
 
-1. Update [CHANGELOG.md](./CHANGELOG.md) by adding new entry (`## [X.Y.Z]`) and commit it.
-2. Create version tag (`git tag vX.Y.Z`)
-3. Run `dotnet fake build -t Pack` to create the nuget package and test/examine it locally.
-4. Push the tag to the repo `git push origin vX.Y.Z` - this will start CI process that will create GitHub release and put generated NuGet packages in it
-5. Upload generated packages into NuGet.org
+        do! Writer.write ($"[INFO] Got user: {user.Name}")
+        return user
+    }
 
-#### Releasing from local machine
-
-In case you don't want to create releases automatically as part of the CI process, we provide also set of helper targets in `build.fsx` script.
-Create release.cmd or release.sh file (already git-ignored) with following content (sample from `cmd`, but `sh` file should be similar):
-
-```
-@echo off
-cls
-
-SET nuget-key=YOUR_NUGET_KEY
-SET github-user=YOUR_GH_USERNAME
-SET github-pw=YOUR_GH_PASSWORD_OR_ACCESS_TOKEN
-
-dotnet fake build --target Release
+// Run and get both the value and the log trail
+let user, logs =
+    fetchUserWithLogs 123
+    |> Async.RunSynchronously
+    |> Writer.run
 ```
 
-## Documentation Theme
+### When things can fail
 
-Template includes, out-of-the-box, nice theme for your project documentation, which integrates with FSharp.Formatting to create also API reference
+```fsharp
+open System.IO
+open AsyncWriterResult
 
-* Sample documentation produced by the template can be found on http://kcieslak.io/SampleAsyncWriterResult.
-* Created theme is partial port to Fornax of [Hugo Learn theme](https://learn.netlify.com/en/).
-* You define content as markdown files
-* Menu navigation based on the documentation system described on https://documentation.divio.com/
-* Use FSharp.Formatting to create API reference for the project - sample: http://kcieslak.io/SampleAsyncWriterResult/Reference/ApiRef.html
-* Use [Lunr.js](https://lunrjs.com/) to provide client side search based on generated by Fornax search index - sample: try searching for `Lorem` or `Sample` in search available on http://kcieslak.io/SampleAsyncWriterResult
-* Use [Mermaid.js](https://mermaid-js.github.io/mermaid/#/) to provide client side render diagrams and graphs - sample: http://kcieslak.io/SampleAsyncWriterResult/diagrams.html
+let parseConfigFile filename =
+    asyncWriterResult {
+        do! Writer.write ($"[INFO] Reading config from {filename}")
+
+        if not (File.Exists filename) then
+            do! Writer.write ($"[ERROR] File not found: {filename}")
+            return! Error ($"Config file '{filename}' doesn't exist")
+
+        let! content = async { return File.ReadAllText filename }
+        do! Writer.write ($"[INFO] Read {content.Length} characters")
+
+        if content.StartsWith "{" then
+            do! Writer.write "[INFO] Valid JSON detected"
+            return content
+        else
+            do! Writer.write "[ERROR] Invalid JSON format"
+            return! Error "Invalid config format"
+    }
+
+let result, configLogs =
+    parseConfigFile "missing.json"
+    |> Async.RunSynchronously
+    |> Writer.run
+```
+
+### Running things in parallel
+
+```fsharp
+open AsyncWriterResult
+
+let checkServiceHealth (url: string) =
+    async {
+        do! Async.Sleep 100
+        return if url.Contains "api" then "healthy" else "degraded"
+    }
+
+let healthCheck () =
+    asyncWriterResult {
+        do! Writer.write "[START] Health check initiated"
+
+        let! apiStatus = checkServiceHealth "https://api.example.com"
+        and! dbStatus = checkServiceHealth "https://db.example.com"
+        and! cacheStatus = checkServiceHealth "https://cache.example.com"
+
+        do! Writer.write ($"[STATUS] API: {apiStatus}")
+        do! Writer.write ($"[STATUS] Database: {dbStatus}")
+        do! Writer.write ($"[STATUS] Cache: {cacheStatus}")
+
+        if apiStatus = "healthy" && dbStatus = "healthy" && cacheStatus = "healthy" then
+            do! Writer.write "[OK] All systems operational"
+            return "All systems GO"
+        else
+            do! Writer.write "[WARN] Some services degraded"
+            return "Partial outage"
+    }
+```
+
+### Processing lists with detailed logging
+
+```fsharp
+open AsyncWriterResult
+
+type Order = { OrderId: string; Amount: decimal }
+
+let processOrders orders =
+    asyncWriterResult {
+        do! Writer.write ($"[START] Processing {List.length orders} orders")
+        let mutable total = 0m
+
+        for order in orders do
+            do! Writer.write ($"[PROCESS] Order {order.OrderId}: ${order.Amount}")
+            if order.Amount <= 0m then
+                do! Writer.write ($"[SKIP] Invalid amount for {order.OrderId}")
+            else
+                total <- total + order.Amount
+                do! Writer.write ($"[OK] Added ${order.Amount} (running total: ${total})")
+
+        do! Writer.write ($"[COMPLETE] Processed batch. Total: ${total}")
+        return total
+    }
+```
+
+### Composing operations
+
+```fsharp
+open AsyncWriterResult
+
+let validateInput (input: string) =
+    asyncWriter {
+        do! Writer.write ($"[VALIDATE] Checking '{input}'")
+        if input.Length > 3 then
+            do! Writer.write "[VALIDATE] Input valid"
+            return input.ToUpper()
+        else
+            do! Writer.write "[VALIDATE] Too short!"
+            return ""
+    }
+
+let processData (data: string) =
+    asyncWriter {
+        do! Writer.write ($"[PROCESS] Working with '{data}'")
+        let result = data.Replace("TEST", "PROD")
+        do! Writer.write ($"[PROCESS] Transformed to '{result}'")
+        return result
+    }
+
+let pipeline input =
+    input
+    |> validateInput
+    |> AsyncWriter.bind processData
+```
 
 ## How to contribute
 
 *Imposter syndrome disclaimer*: I want your help. No really, I do.
 
-There might be a little voice inside that tells you you're not ready; that you need to do one more tutorial, or learn another framework, or write a few more blog posts before you can help me with this project.
+There might be a little voice inside that tells you're not ready; that you need to do one more tutorial, or learn another framework, or write a few more blog posts before you can help me with this project.
 
 I assure you, that's not the case.
 
@@ -91,12 +183,8 @@ And you don't just have to write code. You can help out by writing documentation
 
 Thank you for contributing!
 
-
 ## Contributing and copyright
-
-The project is hosted on [GitHub](TODO: ADD_LINK) where you can report issues, fork
-the project and submit pull requests.
 
 The library is available under [MIT license](LICENSE.md), which allows modification and redistribution for both commercial and non-commercial purposes.
 
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.

@@ -10,7 +10,7 @@ module Writer =
     let map f m =
         let a, w = run m
         Writer <| fun () -> f a, w
-        
+
     let mapLogs f m =
         let a, w = run m
         Writer <| fun () -> a, f w
@@ -28,8 +28,7 @@ module Writer =
         let unwrappedF, logs1 = run f
         let unwrappedA, logs2 = run m
 
-        Writer
-        <| fun () -> unwrappedF unwrappedA, logs1 @ logs2
+        Writer <| fun () -> unwrappedF unwrappedA, logs1 @ logs2
 
     let collect l =
         Writer

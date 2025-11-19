@@ -28,7 +28,6 @@ module AsyncWriter =
         input |> Async.map (fun x -> Writer.bind x binder)
 
     let zip left right =
-        Async.zip left right
-        |> Async.map (fun (r1, r2) -> Writer.zip r1 r2)
+        Async.zip left right |> Async.map (fun (r1, r2) -> Writer.zip r1 r2)
 
     let ignore x = map ignore x

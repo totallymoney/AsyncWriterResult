@@ -6,13 +6,15 @@ open AsyncWriterResult
 [<RequireQualifiedAccess>]
 module AsyncWriterResult =
 
-    let retn x = x |> WriterResult.retn |> Async.singleton
+    let retn x =
+        x |> WriterResult.retn |> Async.singleton
 
     let returnError e = Error e |> AsyncWriter.retn
 
     let map f = f |> WriterResult.map |> Async.map
 
-    let eitherMap fok ferr = Result.eitherMap fok ferr |> Writer.map |> Async.map
+    let eitherMap fok ferr =
+        Result.eitherMap fok ferr |> Writer.map |> Async.map
 
     // let bind (f:'a -> Async<Writer<'b list, Result<'c,'d>>>) (m:Async<Writer<'b list, Result<'a,'d>>>) : Async<Writer<'b list, Result<'c,'d>>> = async {
     let bind f m =
@@ -71,17 +73,14 @@ module AsyncWriterResult =
         let cons head tail = head :: tail
 
         let folder head tail =
-            f head
-            >>= (fun h -> tail >>= (fun t -> retn (cons h t)))
+            f head >>= (fun h -> tail >>= (fun t -> retn (cons h t)))
 
         List.foldBack folder list (retn [])
 
     let collect list =
-        Async.Parallel list
-        |> Async.map (List.ofArray >> WriterResult.collect)
+        Async.Parallel list |> Async.map (List.ofArray >> WriterResult.collect)
 
     let zip left right =
-        Async.zip left right
-        |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)
+        Async.zip left right |> Async.map (fun (r1, r2) -> WriterResult.zip r1 r2)
 
     let ignore x = map ignore x

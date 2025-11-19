@@ -21,4 +21,3 @@ module AsyncWriterBuilderExtensions =
     type AsyncWriterBuilder with
         member __.Source(x: Writer<'w, 't>) = x |> Async.singleton
         member __.Source(x: Async<'a>) = x |> Async.map Writer.retn
-        

@@ -5,7 +5,7 @@ category: docs
 index: 0
 ---
 *)
-#r "../src/AsyncWriterResult/bin/Release/net8.0/publish/AsyncWriterResult.dll"
+#r "../src/AsyncWriterResult/bin/Release/net10.0/AsyncWriterResult.dll"
 
 (**
 # AsyncWriterResult

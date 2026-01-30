@@ -7,7 +7,6 @@ open System.IO
 open Fun.Build
 
 let (</>) a b = Path.Combine(a, b)
-let sln = __SOURCE_DIRECTORY__ </> "AsyncWriterResult.sln"
 let config = "Release"
 let nupkgs = __SOURCE_DIRECTORY__ </> "nupkgs"
 
@@ -32,19 +31,16 @@ pipeline "ci" {
     }
 
     stage "build" {
-        run $"dotnet restore {sln}"
-        run $"dotnet build {sln} -c {config} --no-restore"
+        run "dotnet paket restore"
+        run $"dotnet build -c {config}"
     }
 
-    stage "test" {
-        run
-            $"dotnet run --project tests/AsyncWriterResult.UnitTests/AsyncWriterResult.UnitTests.fsproj -c {config} --no-build"
-    }
+    stage "test" { run $"dotnet run --project tests/AsyncWriterResult.UnitTests -c {config} --no-build" }
 
-    stage "pack" { run $"dotnet pack {sln} -c {config} -p:PackageOutputPath=\"%s{nupkgs}\" {versionProperty}" }
+    stage "pack" { run $"dotnet pack -c {config} -p:PackageOutputPath=\"%s{nupkgs}\" {versionProperty}" }
 
     stage "docs" {
-        run $"dotnet publish src/AsyncWriterResult/AsyncWriterResult.fsproj -c {config} -f net8.0 --no-build"
+        run $"dotnet publish src/AsyncWriterResult -c {config}"
         run $"dotnet fsdocs build --properties Configuration={config} --output output --eval --strict"
     }
 
@@ -56,9 +52,8 @@ pipeline "docs" {
 
     stage "build" {
         run "dotnet tool restore"
-        run $"dotnet restore {sln}"
-        run $"dotnet build {sln} -c {config} --no-restore"
-        run $"dotnet publish src/AsyncWriterResult/AsyncWriterResult.fsproj -c {config} -f net8.0 --no-build"
+        run "dotnet paket restore"
+        run $"dotnet publish src/AsyncWriterResult -c {config}"
         run $"dotnet fsdocs build --properties Configuration={config} --eval --strict"
     }
 
@@ -69,9 +64,8 @@ pipeline "docs:watch" {
     description "Watch and rebuild the documentation site"
 
     stage "build" {
-        run $"dotnet restore {sln}"
-        run $"dotnet build {sln} -c {config} --no-restore"
-        run $"dotnet publish src/AsyncWriterResult/AsyncWriterResult.fsproj -c {config} -f net8.0 --no-build"
+        run "dotnet paket restore"
+        run $"dotnet publish src/AsyncWriterResult -c {config}"
     }
 
     stage "watch" { run "dotnet fsdocs watch --eval --clean" }

@@ -3,11 +3,8 @@ source https://api.nuget.org/v3/index.json
 storage: none
 framework: auto-detect
 
-nuget FSharp.Core
 nuget FsToolkit.ErrorHandling
 nuget Expecto
-nuget FsCheck
-nuget Expecto.FsCheck
 
 group Docs
   source https://api.nuget.org/v3/index.json
@@ -15,7 +12,5 @@ group Docs
   framework: auto-detect
   storage: symlink
 
-  nuget FSharp.Core
   nuget FSharp.Compiler.Service
   nuget FSharp.Formatting
-  nuget Newtonsoft.Json

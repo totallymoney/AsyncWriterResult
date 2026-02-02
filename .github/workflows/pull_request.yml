@@ -14,21 +14,21 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: "8.x.x"
-        cache: true
-        cache-dependency-path: paket.lock
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x.x"
+          cache: true
+          cache-dependency-path: paket.lock
 
-    - name: Restore tools
-      run: dotnet tool restore
+      - name: Restore tools
+        run: dotnet tool restore
 
-    - name: Restore
-      run: dotnet restore ${{env.SLN_FILE}}
+      - name: Restore
+        run: dotnet paket restore
 
-    - name: Build
-      run: dotnet fsi build.fsx
+      - name: Build
+        run: dotnet fsi build.fsx

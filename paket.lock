@@ -1,42 +1,36 @@
 STORAGE: NONE
-RESTRICTION: == net8.0
+RESTRICTION: == net10.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Expecto (10.2.3)
       FSharp.Core (>= 7.0.200)
       Mono.Cecil (>= 0.11.4 < 1.0)
-    Expecto.FsCheck (9.0.4)
-      Expecto (>= 9.0.4)
-      FsCheck (>= 2.14.3)
-    FsCheck (3.3.2)
-      FSharp.Core (>= 5.0.2)
-    FSharp.Core (8.0.403)
+    FSharp.Core (10.0.102)
     FsToolkit.ErrorHandling (5.1)
-      FSharp.Core (>= 6.0.4)
+      FSharp.Core (>= 9.0.300)
     Mono.Cecil (0.11.6)
 
 GROUP Docs
 STORAGE: SYMLINK
-RESTRICTION: == net8.0
+RESTRICTION: == net10.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Compiler.Service (43.8.403)
-      FSharp.Core (8.0.403)
-      System.Buffers (>= 4.5.1)
-      System.Collections.Immutable (>= 8.0)
-      System.Diagnostics.DiagnosticSource (>= 8.0)
-      System.Memory (>= 4.5.5)
+    FSharp.Compiler.Service (43.10.102)
+      FSharp.Core (10.0.102)
+      System.Buffers (>= 4.6)
+      System.Collections.Immutable (>= 9.0)
+      System.Diagnostics.DiagnosticSource (>= 9.0)
+      System.Memory (>= 4.6)
       System.Reflection.Emit (>= 4.7)
-      System.Reflection.Metadata (>= 8.0)
-      System.Runtime.CompilerServices.Unsafe (>= 6.0)
-    FSharp.Core (8.0.403)
+      System.Reflection.Metadata (>= 9.0)
+      System.Runtime.CompilerServices.Unsafe (>= 6.1)
+    FSharp.Core (10.0.102)
     FSharp.Formatting (14.0.1)
       FSharp.Compiler.Service (>= 40.0)
-    Newtonsoft.Json (13.0.4)
     System.Buffers (4.6.1)
-    System.Collections.Immutable (8.0)
-    System.Diagnostics.DiagnosticSource (8.0.1)
+    System.Collections.Immutable (10.0.2)
+    System.Diagnostics.DiagnosticSource (10.0.2)
     System.Memory (4.6.3)
     System.Reflection.Emit (4.7)
-    System.Reflection.Metadata (8.0.1)
+    System.Reflection.Metadata (10.0.2)
     System.Runtime.CompilerServices.Unsafe (6.1.2)

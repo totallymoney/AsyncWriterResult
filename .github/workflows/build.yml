@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: ["master"]
 #    paths-ignore: [ 'docs/**' ]
 
 permissions: write-all
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        dotnet: [8.0.x]
+        dotnet: [10.0.x]
     runs-on: ${{ matrix.os }}
     outputs:
       build_version: ${{ steps.set_version.outputs.version }}
@@ -33,9 +33,9 @@ jobs:
           echo "version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "8.x.x"
+          dotnet-version: ${{ matrix.dotnet }}
           cache: true
           cache-dependency-path: paket.lock
 
@@ -46,7 +46,7 @@ jobs:
         run: dotnet fsi build.fsx
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Packages-${{ matrix.os }}
           path: nupkgs/
@@ -93,9 +93,9 @@ jobs:
           path: nupkgs/
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "8.x.x"
+          dotnet-version: "10.x.x"
 
       - name: Push packages to NuGet.org
         run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source https://www.nuget.org --skip-duplicate
